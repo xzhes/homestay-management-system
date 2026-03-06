@@ -1,5 +1,5 @@
 // 统一管理所有 API 请求
-const API_BASE = 'http://localhost:8081/api'
+const API_BASE = 'http://localhost:8081/api'  // ✅ 保持8081不变
 
 export const homestayApi = {
     // 登录
@@ -9,7 +9,7 @@ export const homestayApi = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         })
-        return await res.text()
+        return await res.json()  // ⭐ 只改这里：text() 改成 json()
     },
 
     // 获取民宿列表

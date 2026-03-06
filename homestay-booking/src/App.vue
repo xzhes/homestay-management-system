@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import LoginForm from './components/LoginForm.vue'
+import LoginForm from './components/Login.vue'
 import HomestayList from './components/HomestayList.vue'
 import ReservationDialog from './components/ReservationDialog.vue'
 import { homestayApi } from './api/homestay'
