@@ -59,9 +59,9 @@ const handleLogin = async () => {
 
       // 根据角色跳转
       if (result.data.role === 'admin') {
-        router.push('/admin/dashboard')
+        router.push('/admin/Dashboard')
       } else {
-        router.push('/home')
+        router.push('/Home')
       }
     } else {
       errorMsg.value = result.message || '用户名或密码错误'
