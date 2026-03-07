@@ -21,6 +21,12 @@ const routes = [
     name: 'AdminDashboard',
     component: () => import('../components/admin/Dashboard.vue'),
     meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
+    path: '/admin/homestays',
+    name: 'AdminHomestays',
+    component: () => import('../components/admin/HomestayManagement.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
   }
 ]
 

@@ -18,7 +18,7 @@
 
     <div class="main">
       <header class="topbar">
-        <div class="topbar-left">☰</div>
+        <a class="topbar-left" href="javascript:void(0)" @click="router.push('/home')">☰</a>
         <div class="topbar-right">
           <span>{{ userName }}</span>
           <el-button size="small" type="danger" @click="handleLogout">退出</el-button>
@@ -75,7 +75,7 @@
         <section class="feature-section">
           <h3 class="section-title">系统功能</h3>
           <div class="feature-grid">
-            <article class="feature-card">
+            <article class="feature-card clickable" @click="router.push('/admin/homestays')">
               <h4>房源管理</h4>
               <p>维护房源基础信息</p>
             </article>
@@ -98,6 +98,7 @@
             <el-table :data="recentReservations" v-loading="loading" empty-text="暂无预约">
               <el-table-column prop="id" label="预约ID" width="100" />
               <el-table-column prop="userId" label="用户ID" width="100" />
+              <el-table-column prop="roomName" label="房间名称" min-width="180" />
               <el-table-column prop="roomId" label="房源ID" width="100" />
               <el-table-column prop="date" label="入住日期" width="140" />
               <el-table-column label="操作" width="100">
@@ -135,7 +136,20 @@ const todayCount = computed(() => {
 
 const uniqueUserCount = computed(() => new Set(reservations.value.map(item => item.userId)).size)
 
-const recentReservations = computed(() => reservations.value.slice(0, 6))
+const roomNameMap = computed(() => {
+  const map = {}
+  homestays.value.forEach(room => {
+    map[room.id] = room.name
+  })
+  return map
+})
+
+const recentReservations = computed(() => {
+  return reservations.value.slice(0, 6).map(item => ({
+    ...item,
+    roomName: roomNameMap.value[item.roomId] || `房源#${item.roomId}`
+  }))
+})
 
 const loadData = async () => {
   loading.value = true
@@ -279,6 +293,13 @@ onMounted(async () => {
   gap: 10px;
 }
 
+.topbar-left {
+  color: #5a4737;
+  font-size: 18px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .content {
   padding: 18px;
 }
@@ -414,6 +435,10 @@ onMounted(async () => {
 .feature-card p {
   margin: 0;
   color: var(--muted);
+}
+
+.clickable {
+  cursor: pointer;
 }
 
 .table-title {

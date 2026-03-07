@@ -8,9 +8,14 @@ public class Homestay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 房源名称
     private String name;
+    // 房源价格（元/晚）
     private Double price;
+    // 房源描述
     private String description;
+    // 房源图片地址（支持 http 链接或 /uploads/xxx.jpg）
+    private String imageUrl;
 
     // 空构造函数
     public Homestay() {
@@ -47,5 +52,13 @@ public class Homestay {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

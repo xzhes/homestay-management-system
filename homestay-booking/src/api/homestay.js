@@ -1,4 +1,5 @@
 ﻿const API_BASE = 'http://localhost:8081/api'
+const SERVER_BASE = 'http://localhost:8081'
 
 async function parseResponse(res) {
   const contentType = res.headers.get('content-type') || ''
@@ -43,5 +44,52 @@ export const homestayApi = {
       method: 'DELETE'
     })
     return await parseResponse(res)
+  },
+
+  async getAdminHomestays() {
+    const res = await fetch(`${API_BASE}/admin/homestays`)
+    return await parseResponse(res)
+  },
+
+  async createHomestay(payload) {
+    const res = await fetch(`${API_BASE}/admin/homestays`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async updateHomestay(id, payload) {
+    const res = await fetch(`${API_BASE}/admin/homestays/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async deleteHomestay(id) {
+    const res = await fetch(`${API_BASE}/admin/homestays/${id}`, {
+      method: 'DELETE'
+    })
+    return await parseResponse(res)
+  },
+
+  async uploadHomestayImage(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch(`${API_BASE}/admin/homestays/upload`, {
+      method: 'POST',
+      body: formData
+    })
+    return await parseResponse(res)
+  },
+
+  getImageUrl(path) {
+    if (!path) return ''
+    if (path.startsWith('http://') || path.startsWith('https://')) return path
+    return `${SERVER_BASE}${path}`
   }
 }
