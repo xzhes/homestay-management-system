@@ -6,11 +6,12 @@ import com.zhes.homestaybackend.repository.HomestayRepository;
 import com.zhes.homestaybackend.repository.ReservationRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
-// 删除这一行 → @RequestMapping("/api")
 public class HomestayController {
 
     private final HomestayRepository homestayRepository;
@@ -22,20 +23,36 @@ public class HomestayController {
         this.reservationRepository = reservationRepository;
     }
 
-    // 获取民宿列表
-    @GetMapping("/api/homestays")  // 改成完整路径
+    @GetMapping("/api/homestays")
     public List<Homestay> getHomestays() {
         return homestayRepository.findAll();
     }
 
-    // 提交预约
-    @PostMapping("/api/reserve/submit")  // 改成完整路径
-    public String submitReservation(@RequestBody Reservation reservation) {
+    @PostMapping("/api/reserve/submit")
+    public Map<String, Object> submitReservation(@RequestBody Reservation reservation) {
+        Map<String, Object> result = new HashMap<>();
+
         try {
+            if (reservation.getRoomId() == null || reservation.getUserId() == null || reservation.getDate() == null) {
+                result.put("code", 400);
+                result.put("message", "Missing required fields");
+                return result;
+            }
+
+            if (!homestayRepository.existsById(reservation.getRoomId())) {
+                result.put("code", 404);
+                result.put("message", "Homestay not found");
+                return result;
+            }
+
             reservationRepository.save(reservation);
-            return "success";
+            result.put("code", 200);
+            result.put("message", "success");
+            return result;
         } catch (Exception e) {
-            return "fail";
+            result.put("code", 500);
+            result.put("message", "fail");
+            return result;
         }
     }
 }

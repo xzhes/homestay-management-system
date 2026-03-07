@@ -1,30 +1,47 @@
-// 统一管理所有 API 请求
-const API_BASE = 'http://localhost:8081/api'  // ✅ 保持8081不变
+﻿const API_BASE = 'http://localhost:8081/api'
+
+async function parseResponse(res) {
+  const contentType = res.headers.get('content-type') || ''
+  if (contentType.includes('application/json')) {
+    return await res.json()
+  }
+  return { code: res.ok ? 200 : res.status, message: await res.text() }
+}
 
 export const homestayApi = {
-    // 登录
-    async login(username, password) {
-        const res = await fetch(`${API_BASE}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        })
-        return await res.json()  // ⭐ 只改这里：text() 改成 json()
-    },
+  async login(username, password) {
+    const res = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+    return await parseResponse(res)
+  },
 
-    // 获取民宿列表
-    async getHomestays() {
-        const res = await fetch(`${API_BASE}/homestays`)
-        return await res.json()
-    },
+  async getHomestays() {
+    const res = await fetch(`${API_BASE}/homestays`)
+    return await parseResponse(res)
+  },
 
-    // 提交预约
-    async submitReservation(userId, roomId, date) {
-        const res = await fetch(`${API_BASE}/reserve/submit`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, roomId, date })
-        })
-        return await res.text()
-    }
+  async submitReservation(userId, roomId, date) {
+    const res = await fetch(`${API_BASE}/reserve/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, roomId, date })
+    })
+    return await parseResponse(res)
+  },
+
+  async getReservations(userId) {
+    const query = userId ? `?userId=${encodeURIComponent(userId)}` : ''
+    const res = await fetch(`${API_BASE}/reservations${query}`)
+    return await parseResponse(res)
+  },
+
+  async deleteReservation(id) {
+    const res = await fetch(`${API_BASE}/reservations/${id}`, {
+      method: 'DELETE'
+    })
+    return await parseResponse(res)
+  }
 }

@@ -1,419 +1,454 @@
-<template>
-  <div class="admin-dashboard">
-    <!-- 顶部导航栏 -->
-    <el-header class="header">
-      <div class="header-left">
-        <h2>🏠 民宿管理系统</h2>
-      </div>
-      <div class="header-right">
-        <el-dropdown>
-          <span class="user-info">
-            <el-icon><Avatar /></el-icon>
-            {{ userName }}
-            <el-icon><ArrowDown /></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-    </el-header>
-
-    <!-- 主体内容 -->
-    <div class="main-content">
-      <!-- 侧边栏 -->
-      <el-aside width="200px" class="sidebar">
-        <el-menu
-            default-active="dashboard"
-            class="menu"
-            @select="handleMenuSelect"
-        >
-          <el-menu-item index="dashboard">
-            <el-icon><DataLine /></el-icon>
-            <span>数据概览</span>
-          </el-menu-item>
-          <el-menu-item index="properties">
-            <el-icon><House /></el-icon>
-            <span>房源管理</span>
-          </el-menu-item>
-          <el-menu-item index="bookings">
-            <el-icon><Tickets /></el-icon>
-            <span>订单管理</span>
-          </el-menu-item>
-          <el-menu-item index="calendar">
-            <el-icon><Calendar /></el-icon>
-            <span>日历管理</span>
-          </el-menu-item>
-          <el-menu-item index="users">
-            <el-icon><User /></el-icon>
-            <span>用户管理</span>
-          </el-menu-item>
-        </el-menu>
-      </el-aside>
-
-      <!-- 内容区 -->
-      <el-main class="content">
-        <!-- 欢迎信息 -->
-        <div class="welcome-card">
-          <h3>👋 欢迎回来，{{ userName }}！</h3>
-          <p>今天是 {{ currentDate }}，祝你工作愉快</p>
+﻿<template>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">H</div>
+        <div class="brand-text">
+          <h2>民宿管理系统</h2>
+          <p>后台首页</p>
         </div>
+      </div>
 
-        <!-- 数据统计卡片 -->
-        <el-row :gutter="20" class="stats-row">
-          <el-col :span="6">
-            <el-card class="stat-card" shadow="hover">
-              <div class="stat-icon" style="background: #409EFF;">
-                <el-icon :size="30"><House /></el-icon>
-              </div>
-              <div class="stat-info">
-                <div class="stat-value">{{ stats.totalProperties }}</div>
+      <ul class="menu">
+        <li v-for="item in menuItems" :key="item" class="menu-item" :class="{ active: item === '首页' }">
+          {{ item }}
+        </li>
+      </ul>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">☰</div>
+        <div class="topbar-right">
+          <span>{{ userName }}</span>
+          <el-button size="small" type="danger" @click="handleLogout">退出</el-button>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="hero">
+          <h1>Hi ~ 欢迎使用民宿管理系统后台</h1>
+          <p>管理房源、预约与用户信息，保持运营清晰高效。</p>
+        </section>
+
+        <section class="stats-section">
+          <h3 class="section-title">数据统计</h3>
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon icon-home">🏠</div>
+              <div>
+                <div class="stat-value">{{ homestays.length }}</div>
                 <div class="stat-label">房源总数</div>
               </div>
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card class="stat-card" shadow="hover">
-              <div class="stat-icon" style="background: #67C23A;">
-                <el-icon :size="30"><Tickets /></el-icon>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon icon-booking">📋</div>
+              <div>
+                <div class="stat-value">{{ reservations.length }}</div>
+                <div class="stat-label">预约总数</div>
               </div>
-              <div class="stat-info">
-                <div class="stat-value">{{ stats.totalBookings }}</div>
-                <div class="stat-label">总订单数</div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon icon-today">🗓</div>
+              <div>
+                <div class="stat-value">{{ todayCount }}</div>
+                <div class="stat-label">今日预约</div>
               </div>
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card class="stat-card" shadow="hover">
-              <div class="stat-icon" style="background: #E6A23C;">
-                <el-icon :size="30"><Clock /></el-icon>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon icon-user">👤</div>
+              <div>
+                <div class="stat-value">{{ uniqueUserCount }}</div>
+                <div class="stat-label">预约用户数</div>
               </div>
-              <div class="stat-info">
-                <div class="stat-value">{{ stats.pendingBookings }}</div>
-                <div class="stat-label">待确认订单</div>
-              </div>
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card class="stat-card" shadow="hover">
-              <div class="stat-icon" style="background: #F56C6C;">
-                <el-icon :size="30"><User /></el-icon>
-              </div>
-              <div class="stat-info">
-                <div class="stat-value">{{ stats.totalUsers }}</div>
-                <div class="stat-label">注册用户</div>
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
+            </article>
+          </div>
+        </section>
 
-        <!-- 快捷操作 -->
-        <el-card class="section-card" shadow="never">
-          <template #header>
-            <h4>⚡ 快捷操作</h4>
-          </template>
-          <el-space wrap :size="15">
-            <el-button type="primary" @click="goToProperties">
-              <el-icon><Plus /></el-icon>
-              添加房源
-            </el-button>
-            <el-button type="success" @click="goToBookings">
-              <el-icon><View /></el-icon>
-              查看订单
-            </el-button>
-            <el-button type="warning" @click="goToCalendar">
-              <el-icon><Calendar /></el-icon>
-              日历管理
-            </el-button>
-          </el-space>
-        </el-card>
+        <section class="banner">
+          <div class="banner-overlay">
+            <h3>温馨舒适的住宿体验</h3>
+            <p>一个更简洁的管理后台首页示例</p>
+          </div>
+        </section>
 
-        <!-- 最新订单 -->
-        <el-card class="section-card" shadow="never">
-          <template #header>
-            <h4>📋 最新订单</h4>
-          </template>
-          <el-table :data="recentBookings" style="width: 100%">
-            <el-table-column prop="id" label="订单号" width="100" />
-            <el-table-column prop="propertyName" label="房源名称" />
-            <el-table-column prop="guestName" label="客人姓名" width="120" />
-            <el-table-column prop="checkIn" label="入住日期" width="120" />
-            <el-table-column prop="checkOut" label="退房日期" width="120" />
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="scope">
-                <el-tag v-if="scope.row.status === '待确认'" type="warning">待确认</el-tag>
-                <el-tag v-else-if="scope.row.status === '已确认'" type="success">已确认</el-tag>
-                <el-tag v-else-if="scope.row.status === '已完成'" type="info">已完成</el-tag>
-                <el-tag v-else type="danger">已取消</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="150">
-              <template #default="scope">
-                <el-button size="small" type="primary" link @click="viewBooking(scope.row)">
-                  查看详情
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-      </el-main>
+        <section class="feature-section">
+          <h3 class="section-title">系统功能</h3>
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h4>房源管理</h4>
+              <p>维护房源基础信息</p>
+            </article>
+            <article class="feature-card">
+              <h4>预约管理</h4>
+              <p>查看并处理用户预约</p>
+            </article>
+            <article class="feature-card">
+              <h4>用户管理</h4>
+              <p>统一管理管理员和普通用户</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="table-wrap">
+          <el-card shadow="never">
+            <template #header>
+              <div class="table-title">最新预约</div>
+            </template>
+            <el-table :data="recentReservations" v-loading="loading" empty-text="暂无预约">
+              <el-table-column prop="id" label="预约ID" width="100" />
+              <el-table-column prop="userId" label="用户ID" width="100" />
+              <el-table-column prop="roomId" label="房源ID" width="100" />
+              <el-table-column prop="date" label="入住日期" width="140" />
+              <el-table-column label="操作" width="100">
+                <template #default="scope">
+                  <el-button type="danger" link @click="removeReservation(scope.row.id)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </section>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { homestayApi } from '../../api/homestay'
 
 const router = useRouter()
+const user = JSON.parse(localStorage.getItem('user') || '{}')
 
-// 阻止未定义组件警告
-const Avatar = ref(null)
-const ArrowDown = ref(null)
-const DataLine = ref(null)
-const House = ref(null)
-const Tickets = ref(null)
-const Calendar = ref(null)
-const User = ref(null)
-const Clock = ref(null)
-const Plus = ref(null)
-const View = ref(null)
-const userName = ref('管理员')
-const currentDate = ref('')
+const userName = ref(user.username || '管理员')
+const homestays = ref([])
+const reservations = ref([])
+const loading = ref(false)
+const menuItems = ['首页', '用户管理', '房源管理', '预约管理']
 
-// 统计数据
-const stats = ref({
-  totalProperties: 12,
-  totalBookings: 48,
-  pendingBookings: 5,
-  totalUsers: 126
+const todayCount = computed(() => {
+  const today = new Date().toISOString().slice(0, 10)
+  return reservations.value.filter(item => item.date === today).length
 })
 
-// 最新订单（模拟数据）
-const recentBookings = ref([
-  {
-    id: '20240306001',
-    propertyName: '温馨小屋',
-    guestName: '张三',
-    checkIn: '2024-03-10',
-    checkOut: '2024-03-12',
-    status: '待确认'
-  },
-  {
-    id: '20240306002',
-    propertyName: '海景房',
-    guestName: '李四',
-    checkIn: '2024-03-15',
-    checkOut: '2024-03-18',
-    status: '已确认'
-  },
-  {
-    id: '20240305001',
-    propertyName: '山景别墅',
-    guestName: '王五',
-    checkIn: '2024-03-08',
-    checkOut: '2024-03-11',
-    status: '已完成'
-  }
-])
+const uniqueUserCount = computed(() => new Set(reservations.value.map(item => item.userId)).size)
 
-// 获取当前日期
-const getCurrentDate = () => {
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-  const day = String(today.getDate()).padStart(2, '0')
-  const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-  const weekDay = weekDays[today.getDay()]
-  currentDate.value = `${year}年${month}月${day}日 ${weekDay}`
-}
+const recentReservations = computed(() => reservations.value.slice(0, 6))
 
-// 获取用户信息
-const getUserInfo = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
-  if (user.name) {
-    userName.value = user.name
-  } else if (user.username) {
-    userName.value = user.username
+const loadData = async () => {
+  loading.value = true
+  try {
+    const [rooms, orders] = await Promise.all([
+      homestayApi.getHomestays(),
+      homestayApi.getReservations()
+    ])
+    homestays.value = Array.isArray(rooms) ? rooms : []
+    reservations.value = Array.isArray(orders) ? orders : []
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('加载数据失败')
+  } finally {
+    loading.value = false
   }
 }
 
-// 菜单选择
-const handleMenuSelect = (index) => {
-  if (index === 'dashboard') {
-    // 已经在dashboard
-  } else if (index === 'properties') {
-    goToProperties()
-  } else if (index === 'bookings') {
-    goToBookings()
-  } else if (index === 'calendar') {
-    goToCalendar()
-  } else if (index === 'users') {
-    ElMessage.info('用户管理功能开发中...')
+const removeReservation = async (id) => {
+  try {
+    await ElMessageBox.confirm('确认删除该预约吗？', '提示', { type: 'warning' })
+    const result = await homestayApi.deleteReservation(id)
+    if (result.code === 200) {
+      ElMessage.success('删除成功')
+      await loadData()
+      return
+    }
+    ElMessage.error(result.message || '删除失败')
+  } catch (err) {
+    if (err !== 'cancel') {
+      console.error(err)
+      ElMessage.error('删除失败')
+    }
   }
 }
 
-// 跳转到房源管理
-const goToProperties = () => {
-  ElMessage.info('房源管理功能即将开发...')
-  // router.push('/admin/properties')
-}
-
-// 跳转到订单管理
-const goToBookings = () => {
-  ElMessage.info('订单管理功能即将开发...')
-  // router.push('/admin/bookings')
-}
-
-// 跳转到日历管理
-const goToCalendar = () => {
-  ElMessage.info('日历管理功能即将开发...')
-  // router.push('/admin/calendar')
-}
-
-// 查看订单详情
-const viewBooking = (booking) => {
-  ElMessage.info(`查看订单 ${booking.id} 详情`)
-}
-
-// 退出登录
 const handleLogout = () => {
   localStorage.removeItem('user')
-  ElMessage.success('已退出登录')
   router.push('/login')
 }
 
-onMounted(() => {
-  getCurrentDate()
-  getUserInfo()
+onMounted(async () => {
+  if (user.role !== 'admin') {
+    router.push('/home')
+    return
+  }
+  await loadData()
 })
 </script>
 
 <style scoped>
-.admin-dashboard {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: #f0f2f5;
+:root {
+  --bg: #f6f3eb;
+  --panel: #efe8db;
+  --ink: #49382c;
+  --muted: #8e7b69;
+  --card: #ffffff;
 }
 
-.header {
-  background: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  height: 60px;
-}
-
-.header-left h2 {
-  margin: 0;
-  color: #409EFF;
-  font-size: 20px;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background 0.3s;
-}
-
-.user-info:hover {
-  background: #f0f2f5;
-}
-
-.main-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
+.dashboard {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 .sidebar {
-  background: #fff;
-  box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+  background: linear-gradient(180deg, #efe7da 0%, #e7dece 100%);
+  border-right: 1px solid #decfb8;
+  padding: 18px 12px;
+}
+
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+}
+
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #d7c3a7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.brand-text h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.brand-text p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .menu {
-  border-right: none;
-  height: 100%;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #5a4737;
+}
+
+.menu-item.active {
+  background: #ddcbb1;
+  font-weight: 600;
+}
+
+.main {
+  min-width: 0;
+}
+
+.topbar {
+  height: 52px;
+  background: #faf7f1;
+  border-bottom: 1px solid #eadfce;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .content {
-  overflow-y: auto;
-  padding: 20px;
+  padding: 18px;
 }
 
-.welcome-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 30px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+.hero {
+  background: radial-gradient(circle at 20% 30%, #efe4d2 0, #efe4d2 12%, #ede5d9 13%, #efe6dc 100%);
+  border-radius: 16px;
+  padding: 30px 24px;
+  text-align: center;
+  margin-bottom: 18px;
 }
 
-.welcome-card h3 {
-  margin: 0 0 10px 0;
-  font-size: 24px;
+.hero h1 {
+  margin: 0 0 8px;
+  font-size: 40px;
 }
 
-.welcome-card p {
+.hero p {
   margin: 0;
-  opacity: 0.9;
+  color: var(--muted);
 }
 
-.stats-row {
-  margin-bottom: 20px;
+.section-title {
+  text-align: center;
+  font-size: 32px;
+  margin: 0 0 12px;
+}
+
+.stats-section,
+.feature-section {
+  margin-bottom: 18px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .stat-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
   display: flex;
   align-items: center;
-  padding: 20px;
+  gap: 10px;
+  box-shadow: 0 8px 20px rgba(88, 67, 44, 0.07);
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  margin-right: 15px;
+  font-size: 20px;
+  color: #fff;
 }
 
-.stat-info {
-  flex: 1;
+.icon-home {
+  background: linear-gradient(135deg, #5e75e5, #7457c8);
+}
+
+.icon-booking {
+  background: linear-gradient(135deg, #ef6d8f, #d54676);
+}
+
+.icon-today {
+  background: linear-gradient(135deg, #45b8eb, #3d92cf);
+}
+
+.icon-user {
+  background: linear-gradient(135deg, #41c08c, #2b9f71);
 }
 
 .stat-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 5px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .stat-label {
-  color: #909399;
-  font-size: 14px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
-.section-card {
-  margin-bottom: 20px;
+.banner {
+  height: 220px;
+  border-radius: 18px;
+  margin-bottom: 18px;
+  background:
+    linear-gradient(120deg, rgba(37, 29, 21, 0.75), rgba(84, 61, 45, 0.35)),
+    linear-gradient(180deg, #ab8a70 0%, #6f5b4d 100%);
+  display: flex;
+  align-items: end;
 }
 
-.section-card h4 {
+.banner-overlay {
+  color: #fff;
+  padding: 20px;
+}
+
+.banner-overlay h3 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.banner-overlay p {
   margin: 0;
-  font-size: 16px;
-  color: #303133;
+  opacity: 0.9;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.feature-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(88, 67, 44, 0.07);
+}
+
+.feature-card h4 {
+  margin: 0 0 8px;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.table-title {
+  font-weight: 600;
+}
+
+@media (max-width: 1000px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 24px;
+  }
+
+  .section-title {
+    font-size: 22px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,22 +1,22 @@
-<template>
+﻿<template>
   <div class="login-page">
     <div class="login-box">
-      <h1>🏠 民宿系统登录</h1>
+      <h1>民宿预约管理系统</h1>
 
       <div class="form-group">
         <input
-            v-model="username"
-            placeholder="用户名"
-            @keyup.enter="handleLogin"
+          v-model="username"
+          placeholder="用户名"
+          @keyup.enter="handleLogin"
         />
       </div>
 
       <div class="form-group">
         <input
-            v-model="password"
-            type="password"
-            placeholder="密码"
-            @keyup.enter="handleLogin"
+          v-model="password"
+          type="password"
+          placeholder="密码"
+          @keyup.enter="handleLogin"
         />
       </div>
 
@@ -30,7 +30,6 @@
 </template>
 
 <script setup>
-/* eslint-disable no-undef */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { homestayApi } from '../api/homestay'
@@ -56,16 +55,15 @@ const handleLogin = async () => {
 
     if (result.code === 200) {
       localStorage.setItem('user', JSON.stringify(result.data))
-
-      // 根据角色跳转
       if (result.data.role === 'admin') {
-        router.push('/admin/Dashboard')
+        router.push('/admin/dashboard')
       } else {
-        router.push('/Home')
+        router.push('/home')
       }
-    } else {
-      errorMsg.value = result.message || '用户名或密码错误'
+      return
     }
+
+    errorMsg.value = result.message || '用户名或密码错误'
   } catch (err) {
     errorMsg.value = '网络错误，请稍后重试'
     console.error(err)
@@ -81,11 +79,11 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #355c7d 0%, #6c5b7b 55%, #c06c84 100%);
 }
 
 .login-box {
-  max-width: 400px;
+  width: min(420px, 92vw);
   background: white;
   padding: 40px;
   border-radius: 12px;
@@ -94,8 +92,9 @@ const handleLogin = async () => {
 
 .login-box h1 {
   text-align: center;
-  color: #409EFF;
+  color: #273043;
   margin-bottom: 30px;
+  font-size: 24px;
 }
 
 .form-group {
@@ -108,18 +107,17 @@ input {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
-  box-sizing: border-box;
 }
 
 input:focus {
   outline: none;
-  border-color: #409EFF;
+  border-color: #355c7d;
 }
 
 button {
   width: 100%;
   padding: 12px;
-  background: #409EFF;
+  background: #355c7d;
   color: white;
   border: none;
   border-radius: 6px;
@@ -128,16 +126,16 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: #337ecc;
+  background: #2a4a65;
 }
 
 button:disabled {
-  background: #ccc;
+  background: #b7b7b7;
   cursor: not-allowed;
 }
 
 .error-msg {
-  color: #f56c6c;
+  color: #d7263d;
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
