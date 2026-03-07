@@ -10,8 +10,10 @@
       </div>
 
       <ul class="menu">
-        <li v-for="item in menuItems" :key="item" class="menu-item" :class="{ active: item === '首页' }">
-          {{ item }}
+        <li v-for="item in menuItems" :key="item.label">
+          <router-link class="menu-item-link" :class="{ active: item.path === currentPath }" :to="item.path">
+            {{ item.label }}
+          </router-link>
         </li>
       </ul>
     </aside>
@@ -75,18 +77,24 @@
         <section class="feature-section">
           <h3 class="section-title">系统功能</h3>
           <div class="feature-grid">
-            <article class="feature-card clickable" @click="router.push('/admin/homestays')">
-              <h4>房源管理</h4>
-              <p>维护房源基础信息</p>
-            </article>
-            <article class="feature-card">
-              <h4>预约管理</h4>
-              <p>查看并处理用户预约</p>
-            </article>
-            <article class="feature-card">
-              <h4>用户管理</h4>
-              <p>统一管理管理员和普通用户</p>
-            </article>
+            <router-link class="feature-card-link" to="/admin/homestays">
+              <article class="feature-card clickable">
+                <h4>房源管理</h4>
+                <p>维护房源基础信息</p>
+              </article>
+            </router-link>
+            <router-link class="feature-card-link" to="/admin/dashboard">
+              <article class="feature-card clickable">
+                <h4>预约管理</h4>
+                <p>查看并处理用户预约</p>
+              </article>
+            </router-link>
+            <router-link class="feature-card-link" to="/admin/users">
+              <article class="feature-card clickable">
+                <h4>用户管理</h4>
+                <p>统一管理管理员和普通用户</p>
+              </article>
+            </router-link>
           </div>
         </section>
 
@@ -116,18 +124,25 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
 const router = useRouter()
+const route = useRoute()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
 
 const userName = ref(user.username || '管理员')
 const homestays = ref([])
 const reservations = ref([])
 const loading = ref(false)
-const menuItems = ['首页', '用户管理', '房源管理', '预约管理']
+const currentPath = computed(() => route.path)
+const menuItems = [
+  { label: '首页', path: '/admin/dashboard' },
+  { label: '用户管理', path: '/admin/users' },
+  { label: '房源管理', path: '/admin/homestays' },
+  { label: '预约管理', path: '/admin/dashboard' }
+]
 
 const todayCount = computed(() => {
   const today = new Date().toISOString().slice(0, 10)
@@ -260,15 +275,17 @@ onMounted(async () => {
   list-style: none;
 }
 
-.menu-item {
+.menu-item-link {
+  display: block;
   padding: 10px 12px;
   border-radius: 10px;
   margin-bottom: 8px;
   background: rgba(255, 255, 255, 0.35);
   color: #5a4737;
+  text-decoration: none;
 }
 
-.menu-item.active {
+.menu-item-link.active {
   background: #ddcbb1;
   font-weight: 600;
 }
@@ -435,6 +452,10 @@ onMounted(async () => {
 .feature-card p {
   margin: 0;
   color: var(--muted);
+}
+
+.feature-card-link {
+  text-decoration: none;
 }
 
 .clickable {

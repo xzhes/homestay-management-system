@@ -17,6 +17,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/booking',
+    name: 'Booking',
+    component: () => import('../components/Booking.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin/dashboard',
     name: 'AdminDashboard',
     component: () => import('../components/admin/Dashboard.vue'),
@@ -26,6 +32,12 @@ const routes = [
     path: '/admin/homestays',
     name: 'AdminHomestays',
     component: () => import('../components/admin/HomestayManagement.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import('../components/admin/UserManagement.vue'),
     meta: { requiresAuth: true, role: 'admin' }
   }
 ]

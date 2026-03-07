@@ -87,6 +87,36 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  async getUsers() {
+    const res = await fetch(`${API_BASE}/admin/users`)
+    return await parseResponse(res)
+  },
+
+  async createUser(payload) {
+    const res = await fetch(`${API_BASE}/admin/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async updateUser(id, payload) {
+    const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async deleteUser(id) {
+    const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+      method: 'DELETE'
+    })
+    return await parseResponse(res)
+  },
+
   getImageUrl(path) {
     if (!path) return ''
     if (path.startsWith('http://') || path.startsWith('https://')) return path
