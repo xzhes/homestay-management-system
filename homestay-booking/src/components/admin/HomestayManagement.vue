@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page">
     <header class="page-header">
       <h2>房源管理</h2>
@@ -19,10 +19,16 @@
         <el-table-column prop="name" label="房间名称" min-width="180" />
         <el-table-column prop="price" label="价格(元/晚)" width="140" />
         <el-table-column prop="description" label="描述" min-width="220" />
-        <el-table-column label="操作" width="180">
+        <el-table-column label="操作" width="220">
           <template #default="scope">
-            <el-button link type="primary" @click="openEdit(scope.row)">编辑</el-button>
-            <el-button link type="danger" @click="removeHomestay(scope.row)">删除</el-button>
+            <el-button
+              link
+              type="primary"
+              :disabled="isReserved(scope.row.id)"
+              @click="openEdit(scope.row)"
+            >编辑</el-button>
+            <el-tag v-if="isReserved(scope.row.id)" type="warning" size="small">已有预约</el-tag>
+            <el-button link type="danger" :disabled="isReserved(scope.row.id)" @click="removeHomestay(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -74,6 +80,7 @@ const user = JSON.parse(localStorage.getItem('user') || '{}')
 const defaultImage = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="480" height="320"><rect width="100%" height="100%" fill="%23efe3cf"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23745a3f" font-size="28">民宿图片</text></svg>'
 
 const homestays = ref([])
+const reservedRoomIds = ref(new Set())
 const loading = ref(false)
 const uploading = ref(false)
 const dialogVisible = ref(false)
@@ -86,11 +93,24 @@ const toImageUrl = (path) => {
   return url || defaultImage
 }
 
+const isReserved = (roomId) => reservedRoomIds.value.has(Number(roomId))
+
 const loadHomestays = async () => {
   loading.value = true
   try {
-    const data = await homestayApi.getAdminHomestays()
-    homestays.value = Array.isArray(data) ? data : []
+    const [rooms, reservations] = await Promise.all([
+      homestayApi.getAdminHomestays(),
+      homestayApi.getReservations()
+    ])
+    homestays.value = Array.isArray(rooms) ? rooms : []
+
+    const ids = new Set()
+    if (Array.isArray(reservations)) {
+      reservations.forEach((item) => {
+        if (item && item.roomId != null) ids.add(Number(item.roomId))
+      })
+    }
+    reservedRoomIds.value = ids
   } catch (err) {
     console.error(err)
     ElMessage.error('加载房源失败')
@@ -107,6 +127,10 @@ const openCreate = () => {
 }
 
 const openEdit = (row) => {
+  if (isReserved(row.id)) {
+    ElMessage.warning('该房型已有预约记录，禁止编辑')
+    return
+  }
   isEdit.value = true
   currentId.value = row.id
   form.value = {
@@ -118,7 +142,6 @@ const openEdit = (row) => {
   dialogVisible.value = true
 }
 
-// 上传图片后，把返回路径写入 form.imageUrl
 const handleUploadRequest = async (option) => {
   uploading.value = true
   try {
@@ -171,6 +194,10 @@ const submitForm = async () => {
 }
 
 const removeHomestay = async (row) => {
+  if (isReserved(row.id)) {
+    ElMessage.warning('该房型已有预约记录，禁止删除')
+    return
+  }
   try {
     await ElMessageBox.confirm(`确认删除房源 ${row.name} 吗？`, '提示', { type: 'warning' })
     const result = await homestayApi.deleteHomestay(row.id)

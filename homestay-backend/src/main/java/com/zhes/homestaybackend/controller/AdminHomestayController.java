@@ -2,6 +2,7 @@ package com.zhes.homestaybackend.controller;
 
 import com.zhes.homestaybackend.entity.Homestay;
 import com.zhes.homestaybackend.repository.HomestayRepository;
+import com.zhes.homestaybackend.repository.ReservationRepository;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,9 +23,12 @@ import java.util.UUID;
 public class AdminHomestayController {
 
     private final HomestayRepository homestayRepository;
+    private final ReservationRepository reservationRepository;
 
-    public AdminHomestayController(HomestayRepository homestayRepository) {
+    public AdminHomestayController(HomestayRepository homestayRepository,
+                                   ReservationRepository reservationRepository) {
         this.homestayRepository = homestayRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     // 上传房源图片，返回可访问路径：/uploads/xxx.jpg
@@ -103,6 +107,11 @@ public class AdminHomestayController {
             result.put("message", "Homestay not found");
             return result;
         }
+        if (reservationRepository.existsByRoomId(id)) {
+            result.put("code", 400);
+            result.put("message", "该房型已有预约记录，禁止编辑");
+            return result;
+        }
 
         if (payload.getName() != null && !payload.getName().isBlank()) {
             homestay.setName(payload.getName());
@@ -131,6 +140,11 @@ public class AdminHomestayController {
         if (!homestayRepository.existsById(id)) {
             result.put("code", 404);
             result.put("message", "Homestay not found");
+            return result;
+        }
+        if (reservationRepository.existsByRoomId(id)) {
+            result.put("code", 400);
+            result.put("message", "该房型已有预约记录，禁止删除");
             return result;
         }
 

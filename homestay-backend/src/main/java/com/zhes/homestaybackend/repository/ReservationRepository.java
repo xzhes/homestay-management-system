@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findByUserIdOrderByIdDesc(Long userId);
+    boolean existsByRoomId(Long roomId);
 }
