@@ -38,12 +38,38 @@ public class HomestayController {
                 result.put("message", "Missing required fields");
                 return result;
             }
+            if (reservation.getPhone() == null || reservation.getPhone().isBlank()
+                || reservation.getIdCard() == null || reservation.getIdCard().isBlank()
+                || reservation.getGender() == null || reservation.getGender().isBlank()
+                || reservation.getRoomNumber() == null || reservation.getRoomNumber().isBlank()
+                || reservation.getStayDays() == null || reservation.getStayDays() <= 0
+                || reservation.getStatus() == null || reservation.getStatus().isBlank()) {
+                result.put("code", 400);
+                result.put("message", "Missing reservation details");
+                return result;
+            }
+            if (reservation.getPaidAmount() == null || reservation.getPaidAmount() < 0) {
+                result.put("code", 400);
+                result.put("message", "Invalid paid amount");
+                return result;
+            }
 
-            if (!homestayRepository.existsById(reservation.getRoomId())) {
+            Homestay homestay = homestayRepository.findById(reservation.getRoomId()).orElse(null);
+            if (homestay == null) {
                 result.put("code", 404);
                 result.put("message", "Homestay not found");
                 return result;
             }
+            if (reservation.getRoomType() != null
+                && !reservation.getRoomType().isBlank()
+                && !reservation.getRoomType().equals(homestay.getName())) {
+                result.put("code", 400);
+                result.put("message", "Room type must match homestay name");
+                return result;
+            }
+
+            // Keep reservation.roomType consistent with homestay.name
+            reservation.setRoomType(homestay.getName());
 
             reservationRepository.save(reservation);
             result.put("code", 200);

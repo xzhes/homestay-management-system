@@ -24,11 +24,11 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
-  async submitReservation(userId, roomId, date) {
+  async submitReservation(payload) {
     const res = await fetch(`${API_BASE}/reserve/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, roomId, date })
+      body: JSON.stringify(payload)
     })
     return await parseResponse(res)
   },

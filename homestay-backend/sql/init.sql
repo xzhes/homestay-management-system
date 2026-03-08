@@ -26,8 +26,27 @@ CREATE TABLE IF NOT EXISTS reservation (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT NOT NULL,
   room_id BIGINT NOT NULL,
-  date VARCHAR(20) NOT NULL
+  date VARCHAR(20) NOT NULL,
+  phone VARCHAR(30),
+  id_card VARCHAR(40),
+  gender VARCHAR(10),
+  room_type VARCHAR(100),
+  room_number VARCHAR(50),
+  stay_days INT,
+  status VARCHAR(30),
+  note VARCHAR(255),
+  paid_amount DECIMAL(10,2)
 );
+
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS phone VARCHAR(30);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS id_card VARCHAR(40);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS room_type VARCHAR(100);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS room_number VARCHAR(50);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS stay_days INT;
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS status VARCHAR(30);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS note VARCHAR(255);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS paid_amount DECIMAL(10,2);
 
 -- 初始化账号
 INSERT IGNORE INTO `user` (id, username, password, role) VALUES
