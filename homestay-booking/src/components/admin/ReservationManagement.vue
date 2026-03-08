@@ -24,8 +24,11 @@
         <el-table-column prop="statusText" label="状态" width="100" />
         <el-table-column prop="note" label="备注" min-width="120" />
         <el-table-column prop="paidAmountText" label="实付金额" width="110" />
-        <el-table-column label="操作" width="90" fixed="right">
-          <template #default="scope"><el-button type="danger" link @click="removeReservation(scope.row.id)">删除</el-button></template>
+        <el-table-column label="操作" width="150" fixed="right">
+          <template #default="scope">
+            <el-button v-if="scope.row.status === '待确认' || scope.row.status === '已预订' || scope.row.status === 'BOOKED'" type="primary" link @click="confirmReservation(scope.row.id)">确认</el-button>
+            <el-button type="danger" link @click="removeReservation(scope.row.id)">删除</el-button>
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -48,9 +51,14 @@ const reservations = ref([])
 const users = ref([])
 
 const statusMap = {
-  BOOKED: '已预订',
+  BOOKED: '待确认',
+  已预订: '待确认',
   CHECKED_IN: '已入住',
-  CHECKED_OUT: '已退房'
+  CHECKED_OUT: '已退房',
+  待确认: '待确认',
+  待入住: '待入住',
+  已入住: '已入住',
+  已退房: '已退房'
 }
 
 const roomMap = computed(() => {
@@ -111,6 +119,21 @@ const removeReservation = async (id) => {
       console.error(err)
       ElMessage.error('删除失败')
     }
+  }
+}
+
+const confirmReservation = async (id) => {
+  try {
+    const result = await homestayApi.confirmReservation(id)
+    if (result.code === 200) {
+      ElMessage.success('确认成功，状态已变更为待入住')
+      await loadData()
+      return
+    }
+    ElMessage.error(result.message || '确认失败')
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('确认失败')
   }
 }
 

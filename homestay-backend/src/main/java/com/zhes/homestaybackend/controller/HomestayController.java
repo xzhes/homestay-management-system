@@ -66,9 +66,7 @@ public class HomestayController {
 
             // Keep reservation.roomType consistent with homestay.name
             reservation.setRoomType(homestay.getName());
-            if (reservation.getStatus() == null || reservation.getStatus().isBlank()) {
-                reservation.setStatus("BOOKED");
-            }
+            reservation.setStatus("待确认");
 
             LocalDate checkInDate = LocalDate.parse(reservation.getDate());
             LocalDate checkOutDate = LocalDate.parse(reservation.getCheckOutDate());

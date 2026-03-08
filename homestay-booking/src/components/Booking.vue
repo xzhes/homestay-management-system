@@ -57,10 +57,15 @@
           <el-table-column prop="date" label="入住时间" width="120" />
           <el-table-column prop="checkOutDate" label="离店时间" width="120" />
           <el-table-column prop="stayDays" label="天数" width="80" />
+          <el-table-column prop="status" label="状态" width="100" />
           <el-table-column prop="paidAmountText" label="实付金额" width="110" />
           <el-table-column prop="note" label="备注" min-width="120" />
-          <el-table-column label="操作" width="100">
-            <template #default="scope"><el-button type="danger" link @click="deleteReservation(scope.row.id)">取消</el-button></template>
+          <el-table-column label="操作" width="190">
+            <template #default="scope">
+              <el-button v-if="scope.row.status === '待入住'" type="primary" link @click="checkIn(scope.row.id)">入住</el-button>
+              <el-button v-if="scope.row.status === '已入住'" type="warning" link @click="checkOut(scope.row.id)">退房</el-button>
+              <el-button type="danger" link @click="deleteReservation(scope.row.id)">取消</el-button>
+            </template>
           </el-table-column>
         </el-table>
       </el-card>
@@ -173,6 +178,36 @@ const submitReservation = async () => {
   } catch (err) {
     console.error(err)
     ElMessage.error('预约失败')
+  }
+}
+
+const checkIn = async (id) => {
+  try {
+    const result = await homestayApi.checkInReservation(id, userId.value)
+    if (result.code === 200) {
+      ElMessage.success('入住成功')
+      await loadReservations()
+      return
+    }
+    ElMessage.error(result.message || '入住失败')
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('入住失败')
+  }
+}
+
+const checkOut = async (id) => {
+  try {
+    const result = await homestayApi.checkOutReservation(id, userId.value)
+    if (result.code === 200) {
+      ElMessage.success('退房成功')
+      await loadReservations()
+      return
+    }
+    ElMessage.error(result.message || '退房失败')
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('退房失败')
   }
 }
 

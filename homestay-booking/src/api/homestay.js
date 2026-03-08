@@ -46,6 +46,27 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  async confirmReservation(id) {
+    const res = await fetch(`${API_BASE}/reservations/${id}/confirm`, {
+      method: 'PUT'
+    })
+    return await parseResponse(res)
+  },
+
+  async checkInReservation(id, userId) {
+    const res = await fetch(`${API_BASE}/reservations/${id}/check-in?userId=${encodeURIComponent(userId)}`, {
+      method: 'PUT'
+    })
+    return await parseResponse(res)
+  },
+
+  async checkOutReservation(id, userId) {
+    const res = await fetch(`${API_BASE}/reservations/${id}/check-out?userId=${encodeURIComponent(userId)}`, {
+      method: 'PUT'
+    })
+    return await parseResponse(res)
+  },
+
   async getAdminHomestays() {
     const res = await fetch(`${API_BASE}/admin/homestays`)
     return await parseResponse(res)
