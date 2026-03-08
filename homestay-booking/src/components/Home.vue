@@ -7,6 +7,7 @@
         <a href="javascript:void(0)">系统公告</a>
         <a href="javascript:void(0)">用户留言</a>
         <a href="javascript:void(0)" @click="router.push('/booking')">预约入住</a>
+        <a href="javascript:void(0)" @click="goAdmin">管理员后台</a>
       </nav>
       <div class="user-box">
         <span>{{ userName }}</span>
@@ -87,6 +88,14 @@ const loadHomestays = async () => {
     console.error(err)
     ElMessage.error('获取房源失败')
   }
+}
+
+const goAdmin = () => {
+  if (user.role === 'admin') {
+    router.push('/admin/dashboard')
+    return
+  }
+  ElMessage.warning('没有管理员权限')
 }
 
 const logout = () => {
