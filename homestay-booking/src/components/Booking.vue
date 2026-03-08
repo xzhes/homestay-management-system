@@ -27,17 +27,22 @@
               </el-form-item>
             </el-col>
             <el-col :xs="24" :md="12">
-              <el-form-item label="入住时间">
-                <el-date-picker v-model="form.date" type="date" value-format="YYYY-MM-DD" placeholder="请选择日期" style="width:100%" />
+              <el-form-item label="入住-离店">
+                <el-date-picker
+                  v-model="form.dateRange"
+                  type="daterange"
+                  value-format="YYYY-MM-DD"
+                  start-placeholder="入住日期"
+                  end-placeholder="离店日期"
+                  style="width:100%"
+                />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :md="12"><el-form-item label="电话"><el-input v-model="form.phone" placeholder="请输入电话" /></el-form-item></el-col>
             <el-col :xs="24" :md="12"><el-form-item label="身份证"><el-input v-model="form.idCard" placeholder="请输入身份证号" /></el-form-item></el-col>
             <el-col :xs="24" :md="12"><el-form-item label="性别"><el-select v-model="form.gender" placeholder="请选择" style="width:100%"><el-option label="男" value="男" /><el-option label="女" value="女" /></el-select></el-form-item></el-col>
-            <el-col :xs="24" :md="12"><el-form-item label="房号"><el-input v-model="form.roomNumber" placeholder="请输入房号" /></el-form-item></el-col>
-            <el-col :xs="24" :md="12"><el-form-item label="居住天数"><el-input-number v-model="form.stayDays" :min="1" :max="90" style="width:100%" /></el-form-item></el-col>
-            <el-col :xs="24" :md="12"><el-form-item label="状态"><el-select v-model="form.status" placeholder="请选择" style="width:100%"><el-option label="已预订" value="BOOKED" /><el-option label="已入住" value="CHECKED_IN" /><el-option label="已退房" value="CHECKED_OUT" /></el-select></el-form-item></el-col>
-            <el-col :xs="24" :md="12"><el-form-item label="实付金额"><el-input-number v-model="form.paidAmount" :min="0" :precision="2" style="width:100%" /></el-form-item></el-col>
+            <el-col :xs="24" :md="12"><el-form-item label="入住天数"><el-input :model-value="computedStayDaysText" disabled /></el-form-item></el-col>
+            <el-col :xs="24" :md="12"><el-form-item label="实付金额"><el-input :model-value="computedPaidAmountText" disabled /></el-form-item></el-col>
             <el-col :xs="24"><el-form-item label="备注"><el-input v-model="form.note" type="textarea" :rows="2" placeholder="请输入备注" /></el-form-item></el-col>
           </el-row>
           <el-form-item><el-button type="primary" @click="submitReservation">提交预约</el-button></el-form-item>
@@ -49,10 +54,9 @@
         <el-table :data="reservations" v-loading="loading" empty-text="暂无预约记录">
           <el-table-column prop="id" label="预约ID" width="90" />
           <el-table-column prop="roomType" label="房间类型" min-width="140" />
-          <el-table-column prop="roomNumber" label="房号" width="100" />
           <el-table-column prop="date" label="入住时间" width="120" />
+          <el-table-column prop="checkOutDate" label="离店时间" width="120" />
           <el-table-column prop="stayDays" label="天数" width="80" />
-          <el-table-column prop="statusText" label="状态" width="110" />
           <el-table-column prop="paidAmountText" label="实付金额" width="110" />
           <el-table-column prop="note" label="备注" min-width="120" />
           <el-table-column label="操作" width="100">
@@ -81,23 +85,13 @@ const loading = ref(false)
 const createDefaultForm = () => ({
   roomId: '',
   roomType: '',
-  date: '',
+  dateRange: [],
   phone: '',
   idCard: '',
   gender: '',
-  roomNumber: '',
-  stayDays: 1,
-  status: 'BOOKED',
   note: '',
-  paidAmount: 0
 })
 const form = ref(createDefaultForm())
-
-const statusMap = {
-  BOOKED: '已预订',
-  CHECKED_IN: '已入住',
-  CHECKED_OUT: '已退房'
-}
 
 const roomByName = computed(() => {
   const map = {}
@@ -105,9 +99,27 @@ const roomByName = computed(() => {
   return map
 })
 
+const computedStayDays = computed(() => {
+  if (!Array.isArray(form.value.dateRange) || form.value.dateRange.length !== 2) return 0
+  const [start, end] = form.value.dateRange
+  if (!start || !end) return 0
+  const startTime = new Date(start).getTime()
+  const endTime = new Date(end).getTime()
+  const days = Math.floor((endTime - startTime) / (24 * 3600 * 1000))
+  return days > 0 ? days : 0
+})
+
+const computedStayDaysText = computed(() => (computedStayDays.value > 0 ? `${computedStayDays.value} 晚` : '请选择入住和离店日期'))
+const computedPaidAmount = computed(() => {
+  const room = roomByName.value[form.value.roomType]
+  const price = Number(room?.price || 0)
+  if (!computedStayDays.value || !price) return 0
+  return Number((computedStayDays.value * price).toFixed(2))
+})
+const computedPaidAmountText = computed(() => (computedPaidAmount.value > 0 ? `¥${computedPaidAmount.value}` : '请选择房型和日期'))
+
 const reservations = computed(() => reservationRaw.value.map((item) => ({
   ...item,
-  statusText: statusMap[item.status] || item.status || '',
   paidAmountText: item.paidAmount == null ? '' : `¥${item.paidAmount}`
 })))
 
@@ -127,34 +139,28 @@ const handleRoomTypeChange = (roomType) => {
 }
 
 const submitReservation = async () => {
+  const range = Array.isArray(form.value.dateRange) ? form.value.dateRange : []
   const payload = {
     userId: userId.value,
     roomId: form.value.roomId,
     roomType: form.value.roomType,
-    date: form.value.date,
+    date: range[0],
+    checkOutDate: range[1],
+    stayDays: computedStayDays.value,
     phone: form.value.phone?.trim(),
     idCard: form.value.idCard?.trim(),
     gender: form.value.gender,
-    roomNumber: form.value.roomNumber?.trim(),
-    stayDays: Number(form.value.stayDays),
-    status: form.value.status,
-    note: form.value.note?.trim(),
-    paidAmount: Number(form.value.paidAmount)
+    note: form.value.note?.trim()
   }
 
-  if (!payload.roomType || !payload.roomId || !payload.date || !payload.phone || !payload.idCard || !payload.gender || !payload.roomNumber || !payload.status) {
+  if (!payload.roomType || !payload.roomId || !payload.date || !payload.checkOutDate || !payload.phone || !payload.idCard || !payload.gender) {
     ElMessage.warning('请完整填写必填信息')
     return
   }
   if (!payload.stayDays || payload.stayDays <= 0) {
-    ElMessage.warning('居住天数必须大于 0')
+    ElMessage.warning('离店日期必须晚于入住日期')
     return
   }
-  if (Number.isNaN(payload.paidAmount) || payload.paidAmount < 0) {
-    ElMessage.warning('实付金额不合法')
-    return
-  }
-
   try {
     const result = await homestayApi.submitReservation(payload)
     if (result.code === 200) {

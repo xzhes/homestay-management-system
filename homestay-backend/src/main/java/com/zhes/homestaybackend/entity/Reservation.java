@@ -14,6 +14,7 @@ public class Reservation {
     private Long userId;
     private Long roomId;
     private String date;
+    private String checkOutDate;
 
     private String phone;
     private String idCard;
@@ -58,6 +59,14 @@ public class Reservation {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getCheckOutDate() {
+        return checkOutDate;
+    }
+
+    public void setCheckOutDate(String checkOutDate) {
+        this.checkOutDate = checkOutDate;
     }
 
     public String getPhone() {
