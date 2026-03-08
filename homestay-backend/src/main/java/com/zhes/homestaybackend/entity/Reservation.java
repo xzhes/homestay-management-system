@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 
 @Entity
 public class Reservation {
@@ -16,6 +17,8 @@ public class Reservation {
     private String date;
     private String checkOutDate;
 
+    @Column(name = "guest_name")
+    private String guestName;
     private String phone;
     private String idCard;
     private String gender;
@@ -67,6 +70,14 @@ public class Reservation {
 
     public void setCheckOutDate(String checkOutDate) {
         this.checkOutDate = checkOutDate;
+    }
+
+    public String getGuestName() {
+        return guestName;
+    }
+
+    public void setGuestName(String guestName) {
+        this.guestName = guestName;
     }
 
     public String getPhone() {

@@ -11,6 +11,7 @@
       <el-table :data="tableData" v-loading="loading" empty-text="暂无预约数据">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="userName" label="用户" width="120" />
+        <el-table-column prop="guestName" label="姓名" width="120" />
         <el-table-column prop="phone" label="电话" width="130" />
         <el-table-column prop="idCard" label="身份证" min-width="180" />
         <el-table-column prop="gender" label="性别" width="90" />

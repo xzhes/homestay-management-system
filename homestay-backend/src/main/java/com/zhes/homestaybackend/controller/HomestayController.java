@@ -43,6 +43,7 @@ public class HomestayController {
                 return result;
             }
             if (reservation.getPhone() == null || reservation.getPhone().isBlank()
+                || reservation.getGuestName() == null || reservation.getGuestName().isBlank()
                 || reservation.getIdCard() == null || reservation.getIdCard().isBlank()
                 || reservation.getGender() == null || reservation.getGender().isBlank()
                 || reservation.getCheckOutDate() == null || reservation.getCheckOutDate().isBlank()) {

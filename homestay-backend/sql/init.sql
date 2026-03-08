@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS reservation (
   room_id BIGINT NOT NULL,
   date VARCHAR(20) NOT NULL,
   check_out_date VARCHAR(20),
+  guest_name VARCHAR(100),
   phone VARCHAR(30),
   id_card VARCHAR(40),
   gender VARCHAR(10),
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS reservation (
 );
 
 ALTER TABLE reservation ADD COLUMN IF NOT EXISTS check_out_date VARCHAR(20);
+ALTER TABLE reservation ADD COLUMN IF NOT EXISTS guest_name VARCHAR(100);
 ALTER TABLE reservation ADD COLUMN IF NOT EXISTS phone VARCHAR(30);
 ALTER TABLE reservation ADD COLUMN IF NOT EXISTS id_card VARCHAR(40);
 ALTER TABLE reservation ADD COLUMN IF NOT EXISTS gender VARCHAR(10);

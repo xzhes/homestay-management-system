@@ -38,6 +38,7 @@
                 />
               </el-form-item>
             </el-col>
+            <el-col :xs="24" :md="12"><el-form-item label="住户姓名"><el-input v-model="form.guestName" placeholder="请输入住户姓名" /></el-form-item></el-col>
             <el-col :xs="24" :md="12"><el-form-item label="电话"><el-input v-model="form.phone" placeholder="请输入电话" /></el-form-item></el-col>
             <el-col :xs="24" :md="12"><el-form-item label="身份证"><el-input v-model="form.idCard" placeholder="请输入身份证号" /></el-form-item></el-col>
             <el-col :xs="24" :md="12"><el-form-item label="性别"><el-select v-model="form.gender" placeholder="请选择" style="width:100%"><el-option label="男" value="男" /><el-option label="女" value="女" /></el-select></el-form-item></el-col>
@@ -54,6 +55,7 @@
         <el-table :data="reservations" v-loading="loading" empty-text="暂无预约记录">
           <el-table-column prop="id" label="预约ID" width="90" />
           <el-table-column prop="roomType" label="房间类型" min-width="140" />
+          <el-table-column prop="guestName" label="住户姓名" width="110" />
           <el-table-column prop="date" label="入住时间" width="120" />
           <el-table-column prop="checkOutDate" label="离店时间" width="120" />
           <el-table-column prop="stayDays" label="天数" width="80" />
@@ -91,6 +93,7 @@ const createDefaultForm = () => ({
   roomId: '',
   roomType: '',
   dateRange: [],
+  guestName: '',
   phone: '',
   idCard: '',
   gender: '',
@@ -152,13 +155,14 @@ const submitReservation = async () => {
     date: range[0],
     checkOutDate: range[1],
     stayDays: computedStayDays.value,
+    guestName: form.value.guestName?.trim(),
     phone: form.value.phone?.trim(),
     idCard: form.value.idCard?.trim(),
     gender: form.value.gender,
     note: form.value.note?.trim()
   }
 
-  if (!payload.roomType || !payload.roomId || !payload.date || !payload.checkOutDate || !payload.phone || !payload.idCard || !payload.gender) {
+  if (!payload.roomType || !payload.roomId || !payload.date || !payload.checkOutDate || !payload.guestName || !payload.phone || !payload.idCard || !payload.gender) {
     ElMessage.warning('请完整填写必填信息')
     return
   }
