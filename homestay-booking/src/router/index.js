@@ -39,6 +39,12 @@ const routes = [
     name: 'AdminUsers',
     component: () => import('../components/admin/UserManagement.vue'),
     meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
+    path: '/admin/reservations',
+    name: 'AdminReservations',
+    component: () => import('../components/admin/ReservationManagement.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
   }
 ]
 

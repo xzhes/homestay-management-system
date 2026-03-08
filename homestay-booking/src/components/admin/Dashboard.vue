@@ -29,7 +29,7 @@
 
       <main class="content">
         <section class="hero">
-          <h1>Hi ~ 欢迎使用民宿管理系统后台</h1>
+          <h1>欢迎使用民宿管理系统后台</h1>
           <p>管理房源、预约与用户信息，保持运营清晰高效。</p>
         </section>
 
@@ -70,7 +70,7 @@
         <section class="banner">
           <div class="banner-overlay">
             <h3>温馨舒适的住宿体验</h3>
-            <p>一个更简洁的管理后台首页示例</p>
+            <p>让您更放心、 安心的品质生活</p>
           </div>
         </section>
 
@@ -83,7 +83,7 @@
                 <p>维护房源基础信息</p>
               </article>
             </router-link>
-            <router-link class="feature-card-link" to="/admin/dashboard">
+            <router-link class="feature-card-link" to="/admin/reservations">
               <article class="feature-card clickable">
                 <h4>预约管理</h4>
                 <p>查看并处理用户预约</p>
@@ -97,26 +97,6 @@
             </router-link>
           </div>
         </section>
-
-        <section class="table-wrap">
-          <el-card shadow="never">
-            <template #header>
-              <div class="table-title">最新预约</div>
-            </template>
-            <el-table :data="recentReservations" v-loading="loading" empty-text="暂无预约">
-              <el-table-column prop="id" label="预约ID" width="100" />
-              <el-table-column prop="userId" label="用户ID" width="100" />
-              <el-table-column prop="roomName" label="房间名称" min-width="180" />
-              <el-table-column prop="roomId" label="房源ID" width="100" />
-              <el-table-column prop="date" label="入住日期" width="140" />
-              <el-table-column label="操作" width="100">
-                <template #default="scope">
-                  <el-button type="danger" link @click="removeReservation(scope.row.id)">删除</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
-        </section>
       </main>
     </div>
   </div>
@@ -125,7 +105,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
 const router = useRouter()
@@ -135,13 +115,12 @@ const user = JSON.parse(localStorage.getItem('user') || '{}')
 const userName = ref(user.username || '管理员')
 const homestays = ref([])
 const reservations = ref([])
-const loading = ref(false)
 const currentPath = computed(() => route.path)
 const menuItems = [
   { label: '首页', path: '/admin/dashboard' },
   { label: '用户管理', path: '/admin/users' },
   { label: '房源管理', path: '/admin/homestays' },
-  { label: '预约管理', path: '/admin/dashboard' }
+  { label: '预约管理', path: '/admin/reservations' }
 ]
 
 const todayCount = computed(() => {
@@ -151,23 +130,7 @@ const todayCount = computed(() => {
 
 const uniqueUserCount = computed(() => new Set(reservations.value.map(item => item.userId)).size)
 
-const roomNameMap = computed(() => {
-  const map = {}
-  homestays.value.forEach(room => {
-    map[room.id] = room.name
-  })
-  return map
-})
-
-const recentReservations = computed(() => {
-  return reservations.value.slice(0, 6).map(item => ({
-    ...item,
-    roomName: roomNameMap.value[item.roomId] || `房源#${item.roomId}`
-  }))
-})
-
 const loadData = async () => {
-  loading.value = true
   try {
     const [rooms, orders] = await Promise.all([
       homestayApi.getHomestays(),
@@ -178,26 +141,6 @@ const loadData = async () => {
   } catch (err) {
     console.error(err)
     ElMessage.error('加载数据失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-const removeReservation = async (id) => {
-  try {
-    await ElMessageBox.confirm('确认删除该预约吗？', '提示', { type: 'warning' })
-    const result = await homestayApi.deleteReservation(id)
-    if (result.code === 200) {
-      ElMessage.success('删除成功')
-      await loadData()
-      return
-    }
-    ElMessage.error(result.message || '删除失败')
-  } catch (err) {
-    if (err !== 'cancel') {
-      console.error(err)
-      ElMessage.error('删除失败')
-    }
   }
 }
 
@@ -460,10 +403,6 @@ onMounted(async () => {
 
 .clickable {
   cursor: pointer;
-}
-
-.table-title {
-  font-weight: 600;
 }
 
 @media (max-width: 1000px) {
