@@ -19,6 +19,15 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  async register(username, password) {
+    const res = await fetch(`${API_BASE}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+    return await parseResponse(res)
+  },
+
   async getHomestays() {
     const res = await fetch(`${API_BASE}/homestays`)
     return await parseResponse(res)

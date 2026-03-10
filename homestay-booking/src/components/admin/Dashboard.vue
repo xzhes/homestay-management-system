@@ -70,7 +70,7 @@
           </div>
         </section>
 
-        <section class="banner">
+        <section class="banner" :style="bannerStyle">
           <div class="banner-overlay">
             <h3>温馨舒适的住宿体验</h3>
             <p>让您更放心、 安心的品质生活</p>
@@ -146,6 +146,15 @@ const loadData = async () => {
     ElMessage.error('加载数据失败')
   }
 }
+
+const bannerStyle = computed(() => {
+  const fallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="500"><rect width="100%" height="100%" fill="%238b6f5c"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23f5efe6" font-size="36">民宿图片</text></svg>'
+  const image = homestays.value.length ? homestayApi.getImageUrl(homestays.value[0].imageUrl) : ''
+  const url = image || fallback
+  return {
+    backgroundImage: `linear-gradient(120deg, rgba(37, 29, 21, 0.65), rgba(84, 61, 45, 0.25)), url(${url})`
+  }
+})
 
 const handleLogout = () => {
   localStorage.removeItem('user')
@@ -366,9 +375,9 @@ onMounted(async () => {
   height: 220px;
   border-radius: 18px;
   margin-bottom: 18px;
-  background:
-    linear-gradient(120deg, rgba(37, 29, 21, 0.75), rgba(84, 61, 45, 0.35)),
-    linear-gradient(180deg, #ab8a70 0%, #6f5b4d 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   display: flex;
   align-items: end;
 }
