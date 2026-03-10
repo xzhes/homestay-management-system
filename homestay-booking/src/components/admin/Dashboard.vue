@@ -20,7 +20,10 @@
 
     <div class="main">
       <header class="topbar">
-        <a class="topbar-left" href="javascript:void(0)" @click="router.push('/home')">☰</a>
+        <a class="topbar-left" href="javascript:void(0)" @click="router.push('/home')">
+          <span class="menu-icon">☰</span>
+          <span class="menu-text">返回用户首页</span>
+        </a>
         <div class="topbar-right">
           <span>{{ userName }}</span>
           <el-button size="small" type="danger" @click="handleLogout">退出</el-button>
@@ -255,9 +258,20 @@ onMounted(async () => {
 
 .topbar-left {
   color: #5a4737;
-  font-size: 18px;
   text-decoration: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-icon {
+  font-size: 18px;
+}
+
+.menu-text {
+  font-size: 13px;
+  color: #6f5a47;
 }
 
 .content {

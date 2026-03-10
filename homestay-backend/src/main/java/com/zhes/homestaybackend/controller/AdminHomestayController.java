@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-// 后台房源管理接口（含图片上传）
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admin/homestays")
@@ -24,6 +23,9 @@ public class AdminHomestayController {
 
     private final HomestayRepository homestayRepository;
     private final ReservationRepository reservationRepository;
+    private static final List<String> ACTIVE_RESERVATION_STATUSES = List.of(
+        "待确认", "待入住", "已入住", "已预订", "BOOKED", "CHECKED_IN"
+    );
 
     public AdminHomestayController(HomestayRepository homestayRepository,
                                    ReservationRepository reservationRepository) {
@@ -31,7 +33,6 @@ public class AdminHomestayController {
         this.reservationRepository = reservationRepository;
     }
 
-    // 上传房源图片，返回可访问路径：/uploads/xxx.jpg
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> uploadImage(@RequestPart("file") MultipartFile file) {
         Map<String, Object> result = new HashMap<>();
@@ -107,9 +108,9 @@ public class AdminHomestayController {
             result.put("message", "Homestay not found");
             return result;
         }
-        if (reservationRepository.existsByRoomId(id)) {
+        if (reservationRepository.existsByRoomIdAndStatusIn(id, ACTIVE_RESERVATION_STATUSES)) {
             result.put("code", 400);
-            result.put("message", "该房型已有预约记录，禁止编辑");
+            result.put("message", "该房型存在有效预约，禁止编辑");
             return result;
         }
 
@@ -142,9 +143,9 @@ public class AdminHomestayController {
             result.put("message", "Homestay not found");
             return result;
         }
-        if (reservationRepository.existsByRoomId(id)) {
+        if (reservationRepository.existsByRoomIdAndStatusIn(id, ACTIVE_RESERVATION_STATUSES)) {
             result.put("code", 400);
-            result.put("message", "该房型已有预约记录，禁止删除");
+            result.put("message", "该房型存在有效预约，禁止删除");
             return result;
         }
 

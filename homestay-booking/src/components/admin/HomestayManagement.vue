@@ -87,6 +87,7 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const currentId = ref(null)
 const form = ref({ name: '', price: 0, description: '', imageUrl: '' })
+const activeStatuses = new Set(['待确认', '待入住', '已入住', '已预订', 'BOOKED', 'CHECKED_IN'])
 
 const toImageUrl = (path) => {
   const url = homestayApi.getImageUrl(path)
@@ -107,7 +108,9 @@ const loadHomestays = async () => {
     const ids = new Set()
     if (Array.isArray(reservations)) {
       reservations.forEach((item) => {
-        if (item && item.roomId != null) ids.add(Number(item.roomId))
+        if (item && item.roomId != null && activeStatuses.has(item.status)) {
+          ids.add(Number(item.roomId))
+        }
       })
     }
     reservedRoomIds.value = ids
