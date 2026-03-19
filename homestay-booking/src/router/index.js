@@ -1,5 +1,6 @@
-﻿import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
+// 前端路由表
 const routes = [
   {
     path: '/',
@@ -48,11 +49,13 @@ const routes = [
   }
 ]
 
+// 创建路由实例
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
 
+// 路由守卫：校验登录与角色权限
 router.beforeEach((to, from, next) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 

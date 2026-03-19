@@ -6,27 +6,42 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Column;
 
+// 预约实体，对应 reservation 表
 @Entity
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 预约用户
     private Long userId;
+    // 房源 ID
     private Long roomId;
+    // 入住日期（YYYY-MM-DD）
     private String date;
+    // 离店日期（YYYY-MM-DD）
     private String checkOutDate;
 
+    // 住户姓名
     @Column(name = "guest_name")
     private String guestName;
+    // 联系电话
     private String phone;
+    // 身份证号
     private String idCard;
+    // 性别
     private String gender;
+    // 房型名称（与房源名称保持一致）
     private String roomType;
+    // 房号（可选）
     private String roomNumber;
+    // 入住天数
     private Integer stayDays;
+    // 状态（待确认/待入住/已入住/已退房等）
     private String status;
+    // 备注
     private String note;
+    // 实付金额
     private Double paidAmount;
 
     public Reservation() {

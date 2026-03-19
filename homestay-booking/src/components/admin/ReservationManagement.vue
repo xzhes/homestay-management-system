@@ -42,8 +42,10 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
+// 路由与登录信息
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
+// 没有图片时的兜底占位图
 const defaultImage = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160"><rect width="100%" height="100%" fill="%23efe3cf"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23745a3f" font-size="20">No Image</text></svg>'
 
 const loading = ref(false)
@@ -51,6 +53,7 @@ const homestays = ref([])
 const reservations = ref([])
 const users = ref([])
 
+// 状态字段统一显示为中文
 const statusMap = {
   BOOKED: '待确认',
   已预订: '待确认',
@@ -62,18 +65,21 @@ const statusMap = {
   已退房: '已退房'
 }
 
+// 房源 ID -> 房源对象
 const roomMap = computed(() => {
   const map = {}
   homestays.value.forEach((room) => { map[room.id] = room })
   return map
 })
 
+// 用户 ID -> 用户名
 const userMap = computed(() => {
   const map = {}
   users.value.forEach((item) => { map[item.id] = item.username })
   return map
 })
 
+// 组合展示字段（图片/用户名/状态文案/金额）
 const tableData = computed(() => reservations.value.map((item) => {
   const room = roomMap.value[item.roomId] || {}
   return {
@@ -86,6 +92,7 @@ const tableData = computed(() => reservations.value.map((item) => {
   }
 }))
 
+// 加载房源、预约、用户数据
 const loadData = async () => {
   loading.value = true
   try {
@@ -105,6 +112,7 @@ const loadData = async () => {
   }
 }
 
+// 删除预约
 const removeReservation = async (id) => {
   try {
     await ElMessageBox.confirm('确认删除该预约吗？', '提示', { type: 'warning' })
@@ -123,6 +131,7 @@ const removeReservation = async (id) => {
   }
 }
 
+// 后台确认预约（待确认 -> 待入住）
 const confirmReservation = async (id) => {
   try {
     const result = await homestayApi.confirmReservation(id)
@@ -138,6 +147,7 @@ const confirmReservation = async (id) => {
   }
 }
 
+// 进入页面时检查管理员权限
 onMounted(async () => {
   if (user.role !== 'admin') {
     router.push('/home')

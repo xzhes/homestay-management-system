@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// 前台房源列表 + 预约提交
 @CrossOrigin(origins = "*")
 @RestController
 public class HomestayController {
@@ -27,21 +28,25 @@ public class HomestayController {
         this.reservationRepository = reservationRepository;
     }
 
+    // 用户端获取全部房源
     @GetMapping("/api/homestays")
     public List<Homestay> getHomestays() {
         return homestayRepository.findAll();
     }
 
+    // 用户端提交预约
     @PostMapping("/api/reserve/submit")
     public Map<String, Object> submitReservation(@RequestBody Reservation reservation) {
         Map<String, Object> result = new HashMap<>();
 
         try {
+            // 基础必填字段
             if (reservation.getRoomId() == null || reservation.getUserId() == null || reservation.getDate() == null) {
                 result.put("code", 400);
                 result.put("message", "缺少必填字段");
                 return result;
             }
+            // 预约明细必填
             if (reservation.getPhone() == null || reservation.getPhone().isBlank()
                 || reservation.getGuestName() == null || reservation.getGuestName().isBlank()
                 || reservation.getIdCard() == null || reservation.getIdCard().isBlank()
@@ -51,12 +56,14 @@ public class HomestayController {
                 result.put("message", "预约信息不完整");
                 return result;
             }
+            // 房源必须存在
             Homestay homestay = homestayRepository.findById(reservation.getRoomId()).orElse(null);
             if (homestay == null) {
                 result.put("code", 404);
                 result.put("message", "房源不存在");
                 return result;
             }
+            // 如果前端带了房型，需与房源名称一致
             if (reservation.getRoomType() != null
                 && !reservation.getRoomType().isBlank()
                 && !reservation.getRoomType().equals(homestay.getName())) {
@@ -65,10 +72,11 @@ public class HomestayController {
                 return result;
             }
 
-            // Keep reservation.roomType consistent with homestay.name
+            // 统一使用房源名称作为房型，防止不一致
             reservation.setRoomType(homestay.getName());
             reservation.setStatus("待确认");
 
+            // 计算入住天数（离店 - 入住）
             LocalDate checkInDate = LocalDate.parse(reservation.getDate());
             LocalDate checkOutDate = LocalDate.parse(reservation.getCheckOutDate());
             long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
@@ -78,13 +86,14 @@ public class HomestayController {
                 return result;
             }
             reservation.setStayDays((int) days);
+
+            // 计算实付金额：房价 * 天数（后端计算，防止篡改）
             if (homestay.getPrice() == null || homestay.getPrice() < 0) {
                 result.put("code", 400);
                 result.put("message", "房源价格异常");
                 return result;
             }
 
-            // Always compute paid amount on backend to prevent tampering
             double paid = BigDecimal.valueOf(homestay.getPrice())
                 .multiply(BigDecimal.valueOf(days))
                 .setScale(2, RoundingMode.HALF_UP)

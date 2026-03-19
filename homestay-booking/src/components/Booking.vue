@@ -81,6 +81,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { homestayApi } from '../api/homestay'
 
+// 路由与当前登录用户
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
 const userName = ref(user.username || '游客')
@@ -89,6 +90,7 @@ const homestays = ref([])
 const reservationRaw = ref([])
 const loading = ref(false)
 
+// 表单默认值
 const createDefaultForm = () => ({
   roomId: '',
   roomType: '',
@@ -101,12 +103,14 @@ const createDefaultForm = () => ({
 })
 const form = ref(createDefaultForm())
 
+// 房型名称 -> 房源对象映射
 const roomByName = computed(() => {
   const map = {}
   homestays.value.forEach((item) => { map[item.name] = item })
   return map
 })
 
+// 根据日期区间计算入住天数
 const computedStayDays = computed(() => {
   if (!Array.isArray(form.value.dateRange) || form.value.dateRange.length !== 2) return 0
   const [start, end] = form.value.dateRange
@@ -117,7 +121,9 @@ const computedStayDays = computed(() => {
   return days > 0 ? days : 0
 })
 
+// 入住天数显示文案
 const computedStayDaysText = computed(() => (computedStayDays.value > 0 ? `${computedStayDays.value} 晚` : '请选择入住和离店日期'))
+// 根据房价 * 天数计算实付金额（前端显示）
 const computedPaidAmount = computed(() => {
   const room = roomByName.value[form.value.roomType]
   const price = Number(room?.price || 0)
@@ -126,26 +132,31 @@ const computedPaidAmount = computed(() => {
 })
 const computedPaidAmountText = computed(() => (computedPaidAmount.value > 0 ? `¥${computedPaidAmount.value}` : '请选择房型和日期'))
 
+// 组装列表展示字段
 const reservations = computed(() => reservationRaw.value.map((item) => ({
   ...item,
   paidAmountText: item.paidAmount == null ? '' : `¥${item.paidAmount}`
 })))
 
+// 加载房源列表
 const loadHomestays = async () => {
   const data = await homestayApi.getHomestays()
   homestays.value = Array.isArray(data) ? data : []
 }
 
+// 加载当前用户的预约
 const loadReservations = async () => {
   const data = await homestayApi.getReservations(userId.value)
   reservationRaw.value = Array.isArray(data) ? data : []
 }
 
+// 选中房型后写入房源 ID
 const handleRoomTypeChange = (roomType) => {
   const room = roomByName.value[roomType]
   form.value.roomId = room ? room.id : ''
 }
 
+// 提交预约
 const submitReservation = async () => {
   const range = Array.isArray(form.value.dateRange) ? form.value.dateRange : []
   const payload = {
@@ -162,6 +173,7 @@ const submitReservation = async () => {
     note: form.value.note?.trim()
   }
 
+  // 基础校验
   if (!payload.roomType || !payload.roomId || !payload.date || !payload.checkOutDate || !payload.guestName || !payload.phone || !payload.idCard || !payload.gender) {
     ElMessage.warning('请完整填写必填信息')
     return
@@ -185,6 +197,7 @@ const submitReservation = async () => {
   }
 }
 
+// 用户入住
 const checkIn = async (id) => {
   try {
     const result = await homestayApi.checkInReservation(id, userId.value)
@@ -200,6 +213,7 @@ const checkIn = async (id) => {
   }
 }
 
+// 用户退房
 const checkOut = async (id) => {
   try {
     const result = await homestayApi.checkOutReservation(id, userId.value)
@@ -215,6 +229,7 @@ const checkOut = async (id) => {
   }
 }
 
+// 取消预约
 const deleteReservation = async (id) => {
   try {
     await ElMessageBox.confirm('确认取消该预约吗？', '提示', { type: 'warning' })
@@ -233,11 +248,13 @@ const deleteReservation = async (id) => {
   }
 }
 
+// 退出登录
 const logout = () => {
   localStorage.removeItem('user')
   router.push('/login')
 }
 
+// 页面加载：校验登录并拉取数据
 onMounted(async () => {
   if (!userId.value) {
     router.push('/login')

@@ -8,17 +8,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// 预约管理接口：后台列表 + 用户入住/退房等操作
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
+    // 数据库访问
     private final ReservationRepository reservationRepository;
 
     public ReservationController(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 
+    // 查询预约：可传 userId 过滤为当前用户
     @GetMapping
     public List<Reservation> getReservations(@RequestParam(required = false) Long userId) {
         if (userId != null) {
@@ -27,6 +30,7 @@ public class ReservationController {
         return reservationRepository.findAll();
     }
 
+    // 删除预约（用户取消或后台删除）
     @DeleteMapping("/{id}")
     public Map<String, Object> deleteReservation(@PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
@@ -41,6 +45,7 @@ public class ReservationController {
         return result;
     }
 
+    // 后台确认预约：待确认/已预订 -> 待入住
     @PutMapping("/{id}/confirm")
     public Map<String, Object> confirmReservation(@PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
@@ -66,6 +71,7 @@ public class ReservationController {
         return result;
     }
 
+    // 用户办理入住：待入住 -> 已入住
     @PutMapping("/{id}/check-in")
     public Map<String, Object> checkIn(@PathVariable Long id, @RequestParam Long userId) {
         Map<String, Object> result = new HashMap<>();
@@ -77,7 +83,7 @@ public class ReservationController {
         }
         if (!reservation.getUserId().equals(userId)) {
             result.put("code", 403);
-            result.put("message", "无权操作该预约");
+            result.put("message", "无权限操作该预约");
             return result;
         }
         if (!"待入住".equals(reservation.getStatus())) {
@@ -93,6 +99,7 @@ public class ReservationController {
         return result;
     }
 
+    // 用户办理退房：已入住 -> 已退房
     @PutMapping("/{id}/check-out")
     public Map<String, Object> checkOut(@PathVariable Long id, @RequestParam Long userId) {
         Map<String, Object> result = new HashMap<>();
@@ -104,7 +111,7 @@ public class ReservationController {
         }
         if (!reservation.getUserId().equals(userId)) {
             result.put("code", 403);
-            result.put("message", "无权操作该预约");
+            result.put("message", "无权限操作该预约");
             return result;
         }
         if (!"已入住".equals(reservation.getStatus())) {

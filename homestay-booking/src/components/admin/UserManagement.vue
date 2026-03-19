@@ -51,6 +51,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
+// 路由
 const router = useRouter()
 const loading = ref(false)
 const users = ref([])
@@ -58,14 +59,17 @@ const dialogVisible = ref(false)
 const mode = ref('create')
 const editingId = ref(null)
 
+// 表单数据
 const form = ref({
   username: '',
   password: '',
   role: 'guest'
 })
 
+// 弹窗标题
 const dialogTitle = computed(() => (mode.value === 'create' ? '新增用户' : '编辑用户'))
 
+// 重置表单
 const resetForm = () => {
   form.value = {
     username: '',
@@ -74,6 +78,7 @@ const resetForm = () => {
   }
 }
 
+// 获取用户列表
 const loadUsers = async () => {
   loading.value = true
   try {
@@ -87,6 +92,7 @@ const loadUsers = async () => {
   }
 }
 
+// 打开新增弹窗
 const openCreateDialog = () => {
   mode.value = 'create'
   editingId.value = null
@@ -94,6 +100,7 @@ const openCreateDialog = () => {
   dialogVisible.value = true
 }
 
+// 打开编辑弹窗
 const openEditDialog = (row) => {
   mode.value = 'edit'
   editingId.value = row.id
@@ -105,6 +112,7 @@ const openEditDialog = (row) => {
   dialogVisible.value = true
 }
 
+// 保存用户（新增或编辑）
 const submitForm = async () => {
   if (!form.value.username || !form.value.password) {
     ElMessage.warning('用户名和密码不能为空')
@@ -132,6 +140,7 @@ const submitForm = async () => {
   }
 }
 
+// 删除用户
 const removeUser = async (id) => {
   try {
     await ElMessageBox.confirm('确认删除该用户吗？', '提示', { type: 'warning' })
@@ -150,6 +159,7 @@ const removeUser = async (id) => {
   }
 }
 
+// 页面初始化：校验管理员权限
 onMounted(async () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   if (user.role !== 'admin') {

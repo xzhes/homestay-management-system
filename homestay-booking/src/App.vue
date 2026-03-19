@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-// 空的就行
+// 根组件：仅作为路由容器
 </script>
 
 <style>

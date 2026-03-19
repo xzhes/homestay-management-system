@@ -1,6 +1,8 @@
-﻿const API_BASE = 'http://localhost:8081/api'
+// 后端接口基础地址
+const API_BASE = 'http://localhost:8081/api'
 const SERVER_BASE = 'http://localhost:8081'
 
+// 统一解析接口返回
 async function parseResponse(res) {
   const contentType = res.headers.get('content-type') || ''
   if (contentType.includes('application/json')) {
@@ -10,6 +12,7 @@ async function parseResponse(res) {
 }
 
 export const homestayApi = {
+  // 登录
   async login(username, password) {
     const res = await fetch(`${API_BASE}/login`, {
       method: 'POST',
@@ -19,6 +22,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 注册
   async register(username, password) {
     const res = await fetch(`${API_BASE}/register`, {
       method: 'POST',
@@ -28,11 +32,13 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 获取房源列表
   async getHomestays() {
     const res = await fetch(`${API_BASE}/homestays`)
     return await parseResponse(res)
   },
 
+  // 提交预约
   async submitReservation(payload) {
     const res = await fetch(`${API_BASE}/reserve/submit`, {
       method: 'POST',
@@ -42,12 +48,14 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 查询预约（可按 userId 过滤）
   async getReservations(userId) {
     const query = userId ? `?userId=${encodeURIComponent(userId)}` : ''
     const res = await fetch(`${API_BASE}/reservations${query}`)
     return await parseResponse(res)
   },
 
+  // 删除预约
   async deleteReservation(id) {
     const res = await fetch(`${API_BASE}/reservations/${id}`, {
       method: 'DELETE'
@@ -55,6 +63,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 后台确认预约
   async confirmReservation(id) {
     const res = await fetch(`${API_BASE}/reservations/${id}/confirm`, {
       method: 'PUT'
@@ -62,6 +71,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 用户办理入住
   async checkInReservation(id, userId) {
     const res = await fetch(`${API_BASE}/reservations/${id}/check-in?userId=${encodeURIComponent(userId)}`, {
       method: 'PUT'
@@ -69,6 +79,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 用户办理退房
   async checkOutReservation(id, userId) {
     const res = await fetch(`${API_BASE}/reservations/${id}/check-out?userId=${encodeURIComponent(userId)}`, {
       method: 'PUT'
@@ -76,6 +87,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 后台房源管理
   async getAdminHomestays() {
     const res = await fetch(`${API_BASE}/admin/homestays`)
     return await parseResponse(res)
@@ -106,6 +118,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 上传房源图片
   async uploadHomestayImage(file) {
     const formData = new FormData()
     formData.append('file', file)
@@ -117,6 +130,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 后台用户管理
   async getUsers() {
     const res = await fetch(`${API_BASE}/admin/users`)
     return await parseResponse(res)
@@ -147,6 +161,7 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  // 拼接图片访问地址
   getImageUrl(path) {
     if (!path) return ''
     if (path.startsWith('http://') || path.startsWith('https://')) return path

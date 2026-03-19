@@ -57,29 +57,35 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { homestayApi } from '../api/homestay'
 
+// 路由与登录信息
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
+// 默认占位图
 const defaultImage = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700"><rect width="100%" height="100%" fill="%23e8dfcf"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23624d39" font-size="42">民宿图片</text></svg>'
 
 const userName = ref(user.username || '游客')
 const userId = ref(user.id)
 const homestays = ref([])
 
+// 图片地址兜底
 const toImageUrl = (path) => {
   const url = homestayApi.getImageUrl(path)
   return url || defaultImage
 }
 
+// 轮播图素材（最多 5 张）
 const carouselImages = computed(() => {
   const list = homestays.value.map(item => item.imageUrl).filter(Boolean)
   return list.length ? list.slice(0, 5) : [defaultImage]
 })
 
+// 简介图片：取第一套房源图
 const introImage = computed(() => {
   if (!homestays.value.length) return defaultImage
   return homestays.value[0].imageUrl || defaultImage
 })
 
+// 获取房源列表
 const loadHomestays = async () => {
   try {
     const data = await homestayApi.getHomestays()
@@ -90,6 +96,7 @@ const loadHomestays = async () => {
   }
 }
 
+// 进入后台（非管理员会提示）
 const goAdmin = () => {
   if (user.role === 'admin') {
     router.push('/admin/dashboard')
@@ -98,11 +105,13 @@ const goAdmin = () => {
   ElMessage.warning('没有管理员权限')
 }
 
+// 退出登录
 const logout = () => {
   localStorage.removeItem('user')
   router.push('/login')
 }
 
+// 页面初始化：检查登录并加载数据
 onMounted(async () => {
   if (!userId.value) {
     router.push('/login')

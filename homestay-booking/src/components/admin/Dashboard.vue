@@ -111,6 +111,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
+// 路由与登录信息
 const router = useRouter()
 const route = useRoute()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -119,6 +120,7 @@ const userName = ref(user.username || '管理员')
 const homestays = ref([])
 const reservations = ref([])
 const currentPath = computed(() => route.path)
+// 侧边菜单
 const menuItems = [
   { label: '首页', path: '/admin/dashboard' },
   { label: '用户管理', path: '/admin/users' },
@@ -126,13 +128,16 @@ const menuItems = [
   { label: '预约管理', path: '/admin/reservations' }
 ]
 
+// 统计今日预约
 const todayCount = computed(() => {
   const today = new Date().toISOString().slice(0, 10)
   return reservations.value.filter(item => item.date === today).length
 })
 
+// 统计预约用户数
 const uniqueUserCount = computed(() => new Set(reservations.value.map(item => item.userId)).size)
 
+// 拉取统计数据
 const loadData = async () => {
   try {
     const [rooms, orders] = await Promise.all([
@@ -147,6 +152,7 @@ const loadData = async () => {
   }
 }
 
+// Banner 背景（优先取第一套房源图）
 const bannerStyle = computed(() => {
   const fallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="500"><rect width="100%" height="100%" fill="%238b6f5c"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23f5efe6" font-size="36">民宿图片</text></svg>'
   const image = homestays.value.length ? homestayApi.getImageUrl(homestays.value[0].imageUrl) : ''
@@ -156,11 +162,13 @@ const bannerStyle = computed(() => {
   }
 })
 
+// 退出登录
 const handleLogout = () => {
   localStorage.removeItem('user')
   router.push('/login')
 }
 
+// 页面初始化：验证权限并加载数据
 onMounted(async () => {
   if (user.role !== 'admin') {
     router.push('/home')

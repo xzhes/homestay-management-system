@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+// 后台房源管理接口
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admin/homestays")
@@ -23,6 +24,8 @@ public class AdminHomestayController {
 
     private final HomestayRepository homestayRepository;
     private final ReservationRepository reservationRepository;
+
+    // 只有这些状态存在时，禁止编辑/删除房源
     private static final List<String> ACTIVE_RESERVATION_STATUSES = List.of(
         "待确认", "待入住", "已入住", "已预订", "BOOKED", "CHECKED_IN"
     );
@@ -33,24 +36,26 @@ public class AdminHomestayController {
         this.reservationRepository = reservationRepository;
     }
 
+    // 上传房源图片
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> uploadImage(@RequestPart("file") MultipartFile file) {
         Map<String, Object> result = new HashMap<>();
 
         if (file == null || file.isEmpty()) {
             result.put("code", 400);
-            result.put("message", "File is empty");
+            result.put("message", "文件为空");
             return result;
         }
 
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             result.put("code", 400);
-            result.put("message", "Only image files are allowed");
+            result.put("message", "仅支持图片文件");
             return result;
         }
 
         try {
+            // 上传到后端项目根目录下的 uploads/ 目录
             Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads");
             Files.createDirectories(uploadDir);
 
@@ -66,38 +71,41 @@ public class AdminHomestayController {
             file.transferTo(targetPath.toFile());
 
             result.put("code", 200);
-            result.put("message", "Uploaded");
+            result.put("message", "上传成功");
             result.put("data", "/uploads/" + fileName);
             return result;
         } catch (IOException e) {
             result.put("code", 500);
-            result.put("message", "Upload failed");
+            result.put("message", "上传失败");
             return result;
         }
     }
 
+    // 获取全部房源
     @GetMapping
     public List<Homestay> getHomestays() {
         return homestayRepository.findAll();
     }
 
+    // 新增房源
     @PostMapping
     public Map<String, Object> createHomestay(@RequestBody Homestay homestay) {
         Map<String, Object> result = new HashMap<>();
 
         if (homestay.getName() == null || homestay.getName().isBlank() || homestay.getPrice() == null) {
             result.put("code", 400);
-            result.put("message", "Name and price are required");
+            result.put("message", "房源名称和价格必填");
             return result;
         }
 
         Homestay saved = homestayRepository.save(homestay);
         result.put("code", 200);
-        result.put("message", "Created");
+        result.put("message", "创建成功");
         result.put("data", saved);
         return result;
     }
 
+    // 编辑房源：已有有效预约时禁止
     @PutMapping("/{id}")
     public Map<String, Object> updateHomestay(@PathVariable Long id, @RequestBody Homestay payload) {
         Map<String, Object> result = new HashMap<>();
@@ -105,7 +113,7 @@ public class AdminHomestayController {
 
         if (homestay == null) {
             result.put("code", 404);
-            result.put("message", "Homestay not found");
+            result.put("message", "房源不存在");
             return result;
         }
         if (reservationRepository.existsByRoomIdAndStatusIn(id, ACTIVE_RESERVATION_STATUSES)) {
@@ -129,18 +137,19 @@ public class AdminHomestayController {
 
         Homestay saved = homestayRepository.save(homestay);
         result.put("code", 200);
-        result.put("message", "Updated");
+        result.put("message", "更新成功");
         result.put("data", saved);
         return result;
     }
 
+    // 删除房源：已有有效预约时禁止
     @DeleteMapping("/{id}")
     public Map<String, Object> deleteHomestay(@PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
 
         if (!homestayRepository.existsById(id)) {
             result.put("code", 404);
-            result.put("message", "Homestay not found");
+            result.put("message", "房源不存在");
             return result;
         }
         if (reservationRepository.existsByRoomIdAndStatusIn(id, ACTIVE_RESERVATION_STATUSES)) {
@@ -151,7 +160,7 @@ public class AdminHomestayController {
 
         homestayRepository.deleteById(id);
         result.put("code", 200);
-        result.put("message", "Deleted");
+        result.put("message", "删除成功");
         return result;
     }
 }

@@ -48,8 +48,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { homestayApi } from '../api/homestay'
 
+// 路由
 const router = useRouter()
 
+// 登录/注册模式
 const mode = ref('login')
 const username = ref('')
 const password = ref('')
@@ -58,16 +60,19 @@ const errorMsg = ref('')
 const successMsg = ref('')
 const loading = ref(false)
 
+// 清空提示信息
 const resetMsg = () => {
   errorMsg.value = ''
   successMsg.value = ''
 }
 
+// 切换登录/注册
 const switchMode = (next) => {
   mode.value = next
   resetMsg()
 }
 
+// 登录处理
 const handleLogin = async () => {
   if (!username.value || !password.value) {
     errorMsg.value = '请输入用户名和密码'
@@ -99,6 +104,7 @@ const handleLogin = async () => {
   }
 }
 
+// 注册处理
 const handleRegister = async () => {
   if (!username.value || !password.value || !confirmPassword.value) {
     errorMsg.value = '请完整填写注册信息'

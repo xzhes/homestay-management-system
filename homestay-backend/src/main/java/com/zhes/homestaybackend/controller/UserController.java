@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+// 登录与注册接口
 @CrossOrigin(origins = "*")
 @RestController
 public class UserController {
@@ -18,6 +19,7 @@ public class UserController {
         this.repository = repository;
     }
 
+    // 登录：校验用户名密码，返回基础用户信息
     @PostMapping("/api/login")
     public Map<String, Object> login(@RequestBody User user, HttpSession session) {
         Map<String, Object> response = new HashMap<>();
@@ -30,12 +32,14 @@ public class UserController {
             return response;
         }
 
+        // 账号密码匹配
         User dbUser = repository.findByUsernameAndPassword(
             user.getUsername(),
             user.getPassword()
         );
 
         if (dbUser != null) {
+            // 记录 session，方便后续扩展
             session.setAttribute("user", dbUser);
 
             Map<String, Object> userData = new HashMap<>();
@@ -55,6 +59,7 @@ public class UserController {
         return response;
     }
 
+    // 注册：创建新用户，默认角色 guest
     @PostMapping("/api/register")
     public Map<String, Object> register(@RequestBody User user) {
         Map<String, Object> response = new HashMap<>();
@@ -67,6 +72,7 @@ public class UserController {
             return response;
         }
 
+        // 防止重名
         if (repository.existsByUsername(user.getUsername())) {
             response.put("code", 400);
             response.put("message", "用户名已存在");

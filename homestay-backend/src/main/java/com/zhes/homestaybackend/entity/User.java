@@ -2,6 +2,7 @@ package com.zhes.homestaybackend.entity;
 
 import jakarta.persistence.*;
 
+// 用户实体，对应 user 表
 @Entity
 @Table(name = "user")
 public class User {
@@ -10,9 +11,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // 用户名
     private String username;
+    // 密码
     private String password;
 
+    // 角色：admin / guest
     private String role;
 
     public String getRole() {

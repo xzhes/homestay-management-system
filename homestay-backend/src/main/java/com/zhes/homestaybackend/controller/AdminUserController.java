@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// 后台用户管理接口
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admin/users")
@@ -19,11 +20,13 @@ public class AdminUserController {
         this.userRepository = userRepository;
     }
 
+    // 查询全部用户
     @GetMapping
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
+    // 新增用户
     @PostMapping
     public Map<String, Object> createUser(@RequestBody User user) {
         Map<String, Object> result = new HashMap<>();
@@ -51,6 +54,7 @@ public class AdminUserController {
         return result;
     }
 
+    // 编辑用户信息
     @PutMapping("/{id}")
     public Map<String, Object> updateUser(@PathVariable Integer id, @RequestBody User payload) {
         Map<String, Object> result = new HashMap<>();
@@ -79,6 +83,7 @@ public class AdminUserController {
         return result;
     }
 
+    // 删除用户
     @DeleteMapping("/{id}")
     public Map<String, Object> deleteUser(@PathVariable Integer id) {
         Map<String, Object> result = new HashMap<>();

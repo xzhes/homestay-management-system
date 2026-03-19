@@ -75,8 +75,10 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
+// 路由与登录信息
 const router = useRouter()
 const user = JSON.parse(localStorage.getItem('user') || '{}')
+// 默认占位图
 const defaultImage = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="480" height="320"><rect width="100%" height="100%" fill="%23efe3cf"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23745a3f" font-size="28">民宿图片</text></svg>'
 
 const homestays = ref([])
@@ -87,15 +89,19 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const currentId = ref(null)
 const form = ref({ name: '', price: 0, description: '', imageUrl: '' })
+// 这些状态表示预约有效，房源不可编辑/删除
 const activeStatuses = new Set(['待确认', '待入住', '已入住', '已预订', 'BOOKED', 'CHECKED_IN'])
 
+// 生成图片地址
 const toImageUrl = (path) => {
   const url = homestayApi.getImageUrl(path)
   return url || defaultImage
 }
 
+// 当前房源是否处于预约中
 const isReserved = (roomId) => reservedRoomIds.value.has(Number(roomId))
 
+// 加载房源与预约数据
 const loadHomestays = async () => {
   loading.value = true
   try {
@@ -122,6 +128,7 @@ const loadHomestays = async () => {
   }
 }
 
+// 新增房源
 const openCreate = () => {
   isEdit.value = false
   currentId.value = null
@@ -129,6 +136,7 @@ const openCreate = () => {
   dialogVisible.value = true
 }
 
+// 编辑房源（预约中禁止）
 const openEdit = (row) => {
   if (isReserved(row.id)) {
     ElMessage.warning('该房型已有预约记录，禁止编辑')
@@ -145,6 +153,7 @@ const openEdit = (row) => {
   dialogVisible.value = true
 }
 
+// 上传图片请求
 const handleUploadRequest = async (option) => {
   uploading.value = true
   try {
@@ -163,6 +172,7 @@ const handleUploadRequest = async (option) => {
   }
 }
 
+// 提交新增/编辑
 const submitForm = async () => {
   if (!form.value.name) {
     ElMessage.warning('房间名称不能为空')
@@ -196,6 +206,7 @@ const submitForm = async () => {
   }
 }
 
+// 删除房源（预约中禁止）
 const removeHomestay = async (row) => {
   if (isReserved(row.id)) {
     ElMessage.warning('该房型已有预约记录，禁止删除')
@@ -218,6 +229,7 @@ const removeHomestay = async (row) => {
   }
 }
 
+// 页面初始化：检查权限并加载数据
 onMounted(async () => {
   if (user.role !== 'admin') {
     router.push('/home')
