@@ -18,4 +18,5 @@ public class UploadResourceConfig implements WebMvcConfigurer {
         String location = "file:" + uploadDir.toString().replace("\\", "/") + "/";
         registry.addResourceHandler("/uploads/**").addResourceLocations(location);
     }
+//    添加资源处理器类，自定义Spring MVC的配置
 }
