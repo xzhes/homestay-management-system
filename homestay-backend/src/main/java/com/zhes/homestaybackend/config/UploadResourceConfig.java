@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 // 把 /uploads/** 映射到后端项目目录下的 uploads 文件夹
+// 让浏览器可以通过 URL 访问服务器上的本地文件（比如图片）
 @Configuration
 public class UploadResourceConfig implements WebMvcConfigurer {
 
