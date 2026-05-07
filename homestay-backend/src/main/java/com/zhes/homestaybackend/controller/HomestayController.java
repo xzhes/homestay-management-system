@@ -1,52 +1,62 @@
 package com.zhes.homestaybackend.controller;
 
 import com.zhes.homestaybackend.entity.Homestay;
+import com.zhes.homestaybackend.entity.HomestayAvailability;
 import com.zhes.homestaybackend.entity.Reservation;
+import com.zhes.homestaybackend.repository.HomestayAvailabilityRepository;
 import com.zhes.homestaybackend.repository.HomestayRepository;
 import com.zhes.homestaybackend.repository.ReservationRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// 前台房源列表 + 预约提交
+// Frontend homestay list and reservation submit endpoints
 @CrossOrigin(origins = "*")
 @RestController
 public class HomestayController {
+    private static final List<String> ACTIVE_RESERVATION_STATUSES = List.of(
+        "待确认", "待入住", "已入住", "已预订", "BOOKED", "CHECKED_IN"
+    );
 
     private final HomestayRepository homestayRepository;
     private final ReservationRepository reservationRepository;
+    private final HomestayAvailabilityRepository homestayAvailabilityRepository;
 
     public HomestayController(HomestayRepository homestayRepository,
-                              ReservationRepository reservationRepository) {
+                              ReservationRepository reservationRepository,
+                              HomestayAvailabilityRepository homestayAvailabilityRepository) {
         this.homestayRepository = homestayRepository;
         this.reservationRepository = reservationRepository;
+        this.homestayAvailabilityRepository = homestayAvailabilityRepository;
     }
 
-    // 用户端获取全部房源
     @GetMapping("/api/homestays")
     public List<Homestay> getHomestays() {
         return homestayRepository.findAll();
     }
 
-    // 用户端提交预约
     @PostMapping("/api/reserve/submit")
+    @Transactional
     public Map<String, Object> submitReservation(@RequestBody Reservation reservation) {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            // 基础必填字段
             if (reservation.getRoomId() == null || reservation.getUserId() == null || reservation.getDate() == null) {
                 result.put("code", 400);
                 result.put("message", "缺少必填字段");
                 return result;
             }
-            // 预约明细必填
+
             if (reservation.getPhone() == null || reservation.getPhone().isBlank()
                 || reservation.getGuestName() == null || reservation.getGuestName().isBlank()
                 || reservation.getIdCard() == null || reservation.getIdCard().isBlank()
@@ -56,14 +66,14 @@ public class HomestayController {
                 result.put("message", "预约信息不完整");
                 return result;
             }
-            // 房源必须存在
+
             Homestay homestay = homestayRepository.findById(reservation.getRoomId()).orElse(null);
             if (homestay == null) {
                 result.put("code", 404);
                 result.put("message", "房源不存在");
                 return result;
             }
-            // 如果前端带了房型，需与房源名称一致
+
             if (reservation.getRoomType() != null
                 && !reservation.getRoomType().isBlank()
                 && !reservation.getRoomType().equals(homestay.getName())) {
@@ -72,22 +82,44 @@ public class HomestayController {
                 return result;
             }
 
-            // 统一使用房源名称作为房型，防止不一致
             reservation.setRoomType(homestay.getName());
             reservation.setStatus("待确认");
 
-            // 计算入住天数（离店 - 入住）
             LocalDate checkInDate = LocalDate.parse(reservation.getDate());
             LocalDate checkOutDate = LocalDate.parse(reservation.getCheckOutDate());
+            LocalDate today = LocalDate.now();
+            if (checkInDate.isBefore(today)) {
+                result.put("code", 400);
+                result.put("message", "入住日期不能早于当前日期");
+                return result;
+            }
+// 用 LocalDate.now() 校验，入住日期早于今天会直接返回
             long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
             if (days <= 0) {
                 result.put("code", 400);
                 result.put("message", "离店日期必须晚于入住日期");
                 return result;
             }
+
+            LocalDate endDate = checkOutDate.minusDays(1);
+            boolean conflictOnCalendar = homestayAvailabilityRepository.existsByRoomIdAndStayDateBetween(
+                reservation.getRoomId(), checkInDate, endDate
+            );
+            boolean conflictOnLegacyData =
+                reservationRepository.existsByRoomIdAndStatusInAndDateLessThanAndCheckOutDateGreaterThan(
+                    reservation.getRoomId(),
+                    ACTIVE_RESERVATION_STATUSES,
+                    reservation.getCheckOutDate(),
+                    reservation.getDate()
+                );
+            if (conflictOnCalendar || conflictOnLegacyData) {
+                result.put("code", 409);
+                result.put("message", "该选定日期已有预约，请更换日期或房型");
+                return result;
+            }
+
             reservation.setStayDays((int) days);
 
-            // 计算实付金额：房价 * 天数（后端计算，防止篡改）
             if (homestay.getPrice() == null || homestay.getPrice() < 0) {
                 result.put("code", 400);
                 result.put("message", "房源价格异常");
@@ -100,11 +132,29 @@ public class HomestayController {
                 .doubleValue();
             reservation.setPaidAmount(paid);
 
-            reservationRepository.save(reservation);
+            Reservation savedReservation = reservationRepository.save(reservation);
+
+            List<HomestayAvailability> availabilityList = new ArrayList<>();
+            for (LocalDate current = checkInDate; current.isBefore(checkOutDate); current = current.plusDays(1)) {
+                HomestayAvailability availability = new HomestayAvailability();
+                availability.setRoomId(savedReservation.getRoomId());
+                availability.setReservationId(savedReservation.getId());
+                availability.setStayDate(current);
+                availabilityList.add(availability);
+            }
+            homestayAvailabilityRepository.saveAll(availabilityList);
+            homestayAvailabilityRepository.flush();
+
             result.put("code", 200);
             result.put("message", "success");
             return result;
+        } catch (DataIntegrityViolationException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            result.put("code", 409);
+            result.put("message", "该选定日期已有预约，请更换日期或房型");
+            return result;
         } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             result.put("code", 500);
             result.put("message", "fail");
             return result;

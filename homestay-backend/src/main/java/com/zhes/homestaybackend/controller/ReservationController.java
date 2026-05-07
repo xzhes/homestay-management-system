@@ -1,27 +1,30 @@
 package com.zhes.homestaybackend.controller;
 
 import com.zhes.homestaybackend.entity.Reservation;
+import com.zhes.homestaybackend.repository.HomestayAvailabilityRepository;
 import com.zhes.homestaybackend.repository.ReservationRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// 预约管理接口：后台列表 + 用户入住/退房等操作
+// Reservation management endpoints for admin and user actions
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
-    // 数据库访问
     private final ReservationRepository reservationRepository;
+    private final HomestayAvailabilityRepository homestayAvailabilityRepository;
 
-    public ReservationController(ReservationRepository reservationRepository) {
+    public ReservationController(ReservationRepository reservationRepository,
+                                 HomestayAvailabilityRepository homestayAvailabilityRepository) {
         this.reservationRepository = reservationRepository;
+        this.homestayAvailabilityRepository = homestayAvailabilityRepository;
     }
 
-    // 查询预约：可传 userId 过滤为当前用户
     @GetMapping
     public List<Reservation> getReservations(@RequestParam(required = false) Long userId) {
         if (userId != null) {
@@ -30,22 +33,24 @@ public class ReservationController {
         return reservationRepository.findAll();
     }
 
-    // 删除预约（用户取消或后台删除）
     @DeleteMapping("/{id}")
+    @Transactional
     public Map<String, Object> deleteReservation(@PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
-        if (!reservationRepository.existsById(id)) {
+        Reservation reservation = reservationRepository.findById(id).orElse(null);
+        if (reservation == null) {
             result.put("code", 404);
             result.put("message", "预约不存在");
             return result;
         }
-        reservationRepository.deleteById(id);
+
+        homestayAvailabilityRepository.deleteByReservationId(id);
+        reservationRepository.delete(reservation);
         result.put("code", 200);
         result.put("message", "删除成功");
         return result;
     }
 
-    // 后台确认预约：待确认/已预订 -> 待入住
     @PutMapping("/{id}/confirm")
     public Map<String, Object> confirmReservation(@PathVariable Long id) {
         Map<String, Object> result = new HashMap<>();
@@ -71,7 +76,6 @@ public class ReservationController {
         return result;
     }
 
-    // 用户办理入住：待入住 -> 已入住
     @PutMapping("/{id}/check-in")
     public Map<String, Object> checkIn(@PathVariable Long id, @RequestParam Long userId) {
         Map<String, Object> result = new HashMap<>();
@@ -99,7 +103,6 @@ public class ReservationController {
         return result;
     }
 
-    // 用户办理退房：已入住 -> 已退房
     @PutMapping("/{id}/check-out")
     public Map<String, Object> checkOut(@PathVariable Long id, @RequestParam Long userId) {
         Map<String, Object> result = new HashMap<>();

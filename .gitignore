@@ -1,0 +1,26 @@
+# node
+node_modules/
+
+# vue
+dist/
+
+# java
+target/
+
+# logs
+*.log
+
+# temp
+.tmp/
+temp/
+tmp/
+
+# idea
+.idea/
+
+# vscode
+.vscode/
+
+# windows
+Thumbs.db
+Desktop.ini
