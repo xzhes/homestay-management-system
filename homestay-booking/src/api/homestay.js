@@ -43,6 +43,20 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  async getMessages(userId) {
+    const res = await fetch(`${API_BASE}/messages?userId=${encodeURIComponent(userId)}`)
+    return await parseResponse(res)
+  },
+
+  async createMessage(payload) {
+    const res = await fetch(`${API_BASE}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
   // 提交预约
   async submitReservation(payload) {
     const res = await fetch(`${API_BASE}/reserve/submit`, {
@@ -149,6 +163,41 @@ export const homestayApi = {
   async deleteAnnouncement(id) {
     const res = await fetch(`${API_BASE}/admin/announcements/${id}`, {
       method: 'DELETE'
+    })
+    return await parseResponse(res)
+  },
+
+  async getAdminMessages() {
+    const res = await fetch(`${API_BASE}/admin/messages`)
+    return await parseResponse(res)
+  },
+
+  async replyMessage(id, payload) {
+    const res = await fetch(`${API_BASE}/admin/messages/${id}/reply`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async deleteMessage(id) {
+    const res = await fetch(`${API_BASE}/admin/messages/${id}`, {
+      method: 'DELETE'
+    })
+    return await parseResponse(res)
+  },
+
+  async getUnreadAdminNotifications() {
+    const res = await fetch(`${API_BASE}/admin/notifications/unread`)
+    return await parseResponse(res)
+  },
+
+  async markAdminNotificationsRead(ids) {
+    const res = await fetch(`${API_BASE}/admin/notifications/read`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ids)
     })
     return await parseResponse(res)
   },

@@ -5,7 +5,7 @@
       <nav class="nav-links">
         <a href="javascript:void(0)" @click="router.push('/home')">首页</a>
         <a href="javascript:void(0)" @click="router.push('/announcements')">系统公告</a>
-        <a href="javascript:void(0)">用户留言</a>
+        <a href="javascript:void(0)" @click="router.push('/messages')">用户留言</a>
         <a href="javascript:void(0)" class="active">预约入住</a>
       </nav>
       <div class="user-box">

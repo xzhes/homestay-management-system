@@ -1,6 +1,8 @@
 package com.zhes.homestaybackend.controller;
 
+import com.zhes.homestaybackend.entity.AdminNotification;
 import com.zhes.homestaybackend.entity.Reservation;
+import com.zhes.homestaybackend.repository.AdminNotificationRepository;
 import com.zhes.homestaybackend.repository.HomestayAvailabilityRepository;
 import com.zhes.homestaybackend.repository.ReservationRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +20,14 @@ public class ReservationController {
 
     private final ReservationRepository reservationRepository;
     private final HomestayAvailabilityRepository homestayAvailabilityRepository;
+    private final AdminNotificationRepository adminNotificationRepository;
 
     public ReservationController(ReservationRepository reservationRepository,
-                                 HomestayAvailabilityRepository homestayAvailabilityRepository) {
+                                 HomestayAvailabilityRepository homestayAvailabilityRepository,
+                                 AdminNotificationRepository adminNotificationRepository) {
         this.reservationRepository = reservationRepository;
         this.homestayAvailabilityRepository = homestayAvailabilityRepository;
+        this.adminNotificationRepository = adminNotificationRepository;
     }
 
     @GetMapping
@@ -46,6 +51,7 @@ public class ReservationController {
 
         homestayAvailabilityRepository.deleteByReservationId(id);
         reservationRepository.delete(reservation);
+        createNotification("reservation", "预约取消提醒", reservation.getGuestName() + " 的预约已取消或删除");
         result.put("code", 200);
         result.put("message", "删除成功");
         return result;
@@ -71,6 +77,7 @@ public class ReservationController {
 
         reservation.setStatus("待入住");
         reservationRepository.save(reservation);
+        createNotification("reservation", "订单状态变化", "预约 #" + reservation.getId() + " 已确认，状态变更为待入住");
         result.put("code", 200);
         result.put("message", "确认成功");
         return result;
@@ -98,6 +105,7 @@ public class ReservationController {
 
         reservation.setStatus("已入住");
         reservationRepository.save(reservation);
+        createNotification("reservation", "订单状态变化", "预约 #" + reservation.getId() + " 已办理入住");
         result.put("code", 200);
         result.put("message", "入住成功");
         return result;
@@ -125,8 +133,17 @@ public class ReservationController {
 
         reservation.setStatus("已退房");
         reservationRepository.save(reservation);
+        createNotification("reservation", "订单状态变化", "预约 #" + reservation.getId() + " 已办理退房");
         result.put("code", 200);
         result.put("message", "退房成功");
         return result;
+    }
+
+    private void createNotification(String type, String title, String content) {
+        AdminNotification notification = new AdminNotification();
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setContent(content);
+        adminNotificationRepository.save(notification);
     }
 }

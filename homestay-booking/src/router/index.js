@@ -30,6 +30,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/messages',
+    name: 'Messages',
+    component: () => import('../components/Messages.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin/dashboard',
     name: 'AdminDashboard',
     component: () => import('../components/admin/Dashboard.vue'),
@@ -57,6 +63,12 @@ const routes = [
     path: '/admin/announcements',
     name: 'AdminAnnouncements',
     component: () => import('../components/admin/AnnouncementManagement.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
+    path: '/admin/messages',
+    name: 'AdminMessages',
+    component: () => import('../components/admin/MessageManagement.vue'),
     meta: { requiresAuth: true, role: 'admin' }
   }
 ]

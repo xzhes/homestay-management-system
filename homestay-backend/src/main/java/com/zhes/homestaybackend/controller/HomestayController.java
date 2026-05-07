@@ -2,7 +2,9 @@ package com.zhes.homestaybackend.controller;
 
 import com.zhes.homestaybackend.entity.Homestay;
 import com.zhes.homestaybackend.entity.HomestayAvailability;
+import com.zhes.homestaybackend.entity.AdminNotification;
 import com.zhes.homestaybackend.entity.Reservation;
+import com.zhes.homestaybackend.repository.AdminNotificationRepository;
 import com.zhes.homestaybackend.repository.HomestayAvailabilityRepository;
 import com.zhes.homestaybackend.repository.HomestayRepository;
 import com.zhes.homestaybackend.repository.ReservationRepository;
@@ -31,13 +33,16 @@ public class HomestayController {
     private final HomestayRepository homestayRepository;
     private final ReservationRepository reservationRepository;
     private final HomestayAvailabilityRepository homestayAvailabilityRepository;
+    private final AdminNotificationRepository adminNotificationRepository;
 
     public HomestayController(HomestayRepository homestayRepository,
                               ReservationRepository reservationRepository,
-                              HomestayAvailabilityRepository homestayAvailabilityRepository) {
+                              HomestayAvailabilityRepository homestayAvailabilityRepository,
+                              AdminNotificationRepository adminNotificationRepository) {
         this.homestayRepository = homestayRepository;
         this.reservationRepository = reservationRepository;
         this.homestayAvailabilityRepository = homestayAvailabilityRepository;
+        this.adminNotificationRepository = adminNotificationRepository;
     }
 
     @GetMapping("/api/homestays")
@@ -144,6 +149,12 @@ public class HomestayController {
             }
             homestayAvailabilityRepository.saveAll(availabilityList);
             homestayAvailabilityRepository.flush();
+            createNotification(
+                "reservation",
+                "新预约提醒",
+                savedReservation.getGuestName() + " 预约了 " + savedReservation.getRoomType()
+                    + "，入住日期：" + savedReservation.getDate()
+            );
 
             result.put("code", 200);
             result.put("message", "success");
@@ -159,5 +170,13 @@ public class HomestayController {
             result.put("message", "fail");
             return result;
         }
+    }
+
+    private void createNotification(String type, String title, String content) {
+        AdminNotification notification = new AdminNotification();
+        notification.setType(type);
+        notification.setTitle(title);
+        notification.setContent(content);
+        adminNotificationRepository.save(notification);
     }
 }

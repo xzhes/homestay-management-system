@@ -104,6 +104,12 @@
                 <p>发布和维护系统公告</p>
               </article>
             </router-link>
+            <router-link class="feature-card-link" to="/admin/messages">
+              <article class="feature-card clickable">
+                <h4>留言管理</h4>
+                <p>查看和回复用户留言</p>
+              </article>
+            </router-link>
           </div>
         </section>
       </main>
@@ -114,7 +120,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 import { homestayApi } from '../../api/homestay'
 
 // 路由与登录信息
@@ -132,7 +138,8 @@ const menuItems = [
   { label: '用户管理', path: '/admin/users' },
   { label: '房源管理', path: '/admin/homestays' },
   { label: '预约管理', path: '/admin/reservations' },
-  { label: '公告管理', path: '/admin/announcements' }
+  { label: '公告管理', path: '/admin/announcements' },
+  { label: '留言管理', path: '/admin/messages' }
 ]
 
 // 统计今日预约
@@ -159,6 +166,30 @@ const loadData = async () => {
   }
 }
 
+const loadNotifications = async () => {
+  try {
+    const notifications = await homestayApi.getUnreadAdminNotifications()
+    if (!Array.isArray(notifications) || !notifications.length) return
+
+    const preview = notifications
+      .slice(0, 5)
+      .map(item => `${item.title}：${item.content}`)
+      .join('\n')
+    const moreText = notifications.length > 5 ? `\n还有 ${notifications.length - 5} 条未读提醒` : ''
+
+    ElNotification({
+      title: `有 ${notifications.length} 条新提醒`,
+      message: `${preview}${moreText}`,
+      type: 'warning',
+      duration: 8000
+    })
+
+    await homestayApi.markAdminNotificationsRead(notifications.map(item => item.id))
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 // Banner 背景（优先取第一套房源图）
 const bannerStyle = computed(() => {
   const fallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="500"><rect width="100%" height="100%" fill="%238b6f5c"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23f5efe6" font-size="36">民宿图片</text></svg>'
@@ -181,7 +212,7 @@ onMounted(async () => {
     router.push('/home')
     return
   }
-  await loadData()
+  await Promise.all([loadData(), loadNotifications()])
 })
 </script>
 
@@ -414,7 +445,7 @@ onMounted(async () => {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
