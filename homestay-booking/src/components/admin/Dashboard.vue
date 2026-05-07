@@ -98,6 +98,12 @@
                 <p>统一管理管理员和普通用户</p>
               </article>
             </router-link>
+            <router-link class="feature-card-link" to="/admin/announcements">
+              <article class="feature-card clickable">
+                <h4>公告管理</h4>
+                <p>发布和维护系统公告</p>
+              </article>
+            </router-link>
           </div>
         </section>
       </main>
@@ -125,7 +131,8 @@ const menuItems = [
   { label: '首页', path: '/admin/dashboard' },
   { label: '用户管理', path: '/admin/users' },
   { label: '房源管理', path: '/admin/homestays' },
-  { label: '预约管理', path: '/admin/reservations' }
+  { label: '预约管理', path: '/admin/reservations' },
+  { label: '公告管理', path: '/admin/announcements' }
 ]
 
 // 统计今日预约
@@ -407,7 +414,7 @@ onMounted(async () => {
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 

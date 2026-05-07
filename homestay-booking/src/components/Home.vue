@@ -4,7 +4,7 @@
       <div class="brand">民宿管理系统</div>
       <nav class="nav-links">
         <a href="javascript:void(0)">首页</a>
-        <a href="javascript:void(0)">系统公告</a>
+        <a href="javascript:void(0)" @click="router.push('/announcements')">系统公告</a>
         <a href="javascript:void(0)">用户留言</a>
         <a href="javascript:void(0)" @click="router.push('/booking')">预约入住</a>
         <a href="javascript:void(0)" @click="goAdmin">管理员后台</a>

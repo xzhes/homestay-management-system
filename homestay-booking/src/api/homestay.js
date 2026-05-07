@@ -38,6 +38,11 @@ export const homestayApi = {
     return await parseResponse(res)
   },
 
+  async getAnnouncements() {
+    const res = await fetch(`${API_BASE}/announcements`)
+    return await parseResponse(res)
+  },
+
   // 提交预约
   async submitReservation(payload) {
     const res = await fetch(`${API_BASE}/reserve/submit`, {
@@ -113,6 +118,36 @@ export const homestayApi = {
 
   async deleteHomestay(id) {
     const res = await fetch(`${API_BASE}/admin/homestays/${id}`, {
+      method: 'DELETE'
+    })
+    return await parseResponse(res)
+  },
+
+  async getAdminAnnouncements() {
+    const res = await fetch(`${API_BASE}/admin/announcements`)
+    return await parseResponse(res)
+  },
+
+  async createAnnouncement(payload) {
+    const res = await fetch(`${API_BASE}/admin/announcements`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async updateAnnouncement(id, payload) {
+    const res = await fetch(`${API_BASE}/admin/announcements/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return await parseResponse(res)
+  },
+
+  async deleteAnnouncement(id) {
+    const res = await fetch(`${API_BASE}/admin/announcements/${id}`, {
       method: 'DELETE'
     })
     return await parseResponse(res)

@@ -24,6 +24,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/announcements',
+    name: 'Announcements',
+    component: () => import('../components/Announcements.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin/dashboard',
     name: 'AdminDashboard',
     component: () => import('../components/admin/Dashboard.vue'),
@@ -45,6 +51,12 @@ const routes = [
     path: '/admin/reservations',
     name: 'AdminReservations',
     component: () => import('../components/admin/ReservationManagement.vue'),
+    meta: { requiresAuth: true, role: 'admin' }
+  },
+  {
+    path: '/admin/announcements',
+    name: 'AdminAnnouncements',
+    component: () => import('../components/admin/AnnouncementManagement.vue'),
     meta: { requiresAuth: true, role: 'admin' }
   }
 ]
